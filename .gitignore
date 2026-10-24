@@ -1,0 +1,36 @@
+# ====================
+# Maven / Java
+# ====================
+target/
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.log
+
+# ====================
+# IntelliJ IDEA
+# ====================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.ai/
+
+# ====================
+# NetBeans
+# ====================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ====================
+# VS Code
+# ====================
+.vscode/
+*.code-workspace
