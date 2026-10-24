@@ -5,10 +5,7 @@
 package Entidades;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  *
@@ -17,42 +14,45 @@ import javax.persistence.Id;
 @Entity
 public class DiningTable implements Serializable {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long idTable;
+
+    @Column(name = "number", nullable = false, length = 10)
+    private int number;
+
+    @Column(name = "capacity", nullable = false, length = 1)
+    private int capacity;
+
+    public DiningTable() {
+    }
+
+    public DiningTable(int number, int capacity) {
+        this.number = number;
+        this.capacity = capacity;
+    }
 
     public Long getId() {
-        return id;
+        return idTable;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.idTable = id;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
+    public int getNumber() {
+        return number;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof DiningTable)) {
-            return false;
-        }
-        DiningTable other = (DiningTable) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+    public void setNumber(int number) {
+        this.number = number;
     }
 
-    @Override
-    public String toString() {
-        return "Entidades.DiningTable[ id=" + id + " ]";
+    public int getCapacity() {
+        return capacity;
     }
-    
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
 }
