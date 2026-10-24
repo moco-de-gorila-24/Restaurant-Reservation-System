@@ -4,6 +4,8 @@
 
 package com.mycompany.restaurant.reservation.system;
 
+import Presentacion.Coordinador.Coordinador;
+
 /**
  *
  * @author luis
@@ -11,6 +13,7 @@ package com.mycompany.restaurant.reservation.system;
 public class RestaurantReservationSystem {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        Coordinador coordinador = new Coordinador();
+        coordinador.iniciarComponentes();
     }
 }
