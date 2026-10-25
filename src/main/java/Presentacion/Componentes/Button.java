@@ -8,13 +8,14 @@ public class Button extends JButton {
     private int radio = 30;
 
     // Colores (arriba, abajo) de cada estado
-    private Color normalArriba = new Color(52, 60, 82);
-    private Color normalAbajo = new Color(30, 35, 52);
-    private Color hoverArriba = new Color(70, 80, 108);
-    private Color hoverAbajo = new Color(42, 49, 72);
-    private Color presionadoArriba = new Color(24, 28, 42);
-    private Color presionadoAbajo = new Color(18, 21, 32);
-    private Color colorBorde = new Color(90, 102, 135);
+    private Color normalArriba = new Color(110, 128, 72);
+    private Color normalAbajo = new Color(80, 95, 50);
+    private Color hoverArriba = new Color(132, 150, 92);
+    private Color hoverAbajo = new Color(98, 114, 62);
+    private Color presionadoArriba = new Color(66, 78, 40);
+    private Color presionadoAbajo = new Color(52, 62, 32);
+    private Color colorBorde = new Color(184, 150, 92);
+    private Color colorTexto = new Color(252, 249, 242);
 
     public Button(String texto) {
         super(texto);
@@ -25,6 +26,8 @@ public class Button extends JButton {
         setForeground(new Color(235, 238, 245));
         setFont(new Font("Arial", Font.BOLD, 14));
         setCursor(new Cursor(Cursor.HAND_CURSOR));
+        setPreferredSize(new Dimension(220, 45));
+
     }
 
     @Override
@@ -47,11 +50,9 @@ public class Button extends JButton {
         int w = getWidth();
         int h = getHeight();
 
-        // Fondo con degradado vertical
         g2.setPaint(new GradientPaint(0, 0, arriba, 0, h, abajo));
         g2.fill(new RoundRectangle2D.Float(0, 0, w, h, radio, radio));
 
-        // Borde fino
         g2.setColor(colorBorde);
         g2.setStroke(new BasicStroke(1f));
         g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, w - 1, h - 1, radio, radio));
