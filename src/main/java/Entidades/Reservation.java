@@ -2,6 +2,7 @@ package Entidades;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import javax.persistence.*;
 
 /**
@@ -13,28 +14,28 @@ public class Reservation implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long idResservation;
+    private Long idReservation;
 
     @Column(name = "date", nullable = false, length = 10) //dd/mm/yyyy
     private LocalDate date;
 
     @Column(name = "hour")
-    private LocalDate hour;
+    private LocalTime hour;
 
     public Reservation() {
     }
 
-    public Reservation(LocalDate date, LocalDate hour) {
+    public Reservation(LocalDate date, LocalTime hour) {
         this.date = date;
         this.hour = hour;
     }
 
     public Long getId() {
-        return idResservation;
+        return idReservation;
     }
 
     public void setId(Long id) {
-        this.idResservation = id;
+    this.idReservation = id;
     }
 
     public LocalDate getDate() {
@@ -45,11 +46,11 @@ public class Reservation implements Serializable {
         this.date = date;
     }
 
-    public LocalDate getHour() {
+    public LocalTime getHour() {
         return hour;
     }
 
-    public void setHour(LocalDate hour) {
+    public void setHour(LocalTime hour) {
         this.hour = hour;
     }
 }

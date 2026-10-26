@@ -20,7 +20,7 @@ public class Customer implements Serializable {
     private Long idCustomer;
 
     @Column(name = "name", nullable = false, length = 60)
-    private int name;
+    private String name;
 
     @Column(name = "email", nullable = false, length = 50)
     private String email;
@@ -31,7 +31,7 @@ public class Customer implements Serializable {
     public Customer() {
     }
 
-    public Customer(int name, List<String> telephone, String email) {
+    public Customer(String name, List<String> telephone, String email) {
         this.name = name;
         this.telephone = telephone;
         this.email = email;
@@ -45,11 +45,11 @@ public class Customer implements Serializable {
         this.idCustomer = id;
     }
 
-    public int getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(int name) {
+    public void setName(String name) {
         this.name = name;
     }
 

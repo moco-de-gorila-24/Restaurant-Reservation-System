@@ -21,7 +21,7 @@ public class Restaurant implements Serializable {
     @Column(name = "name", nullable = false, length = 30)
     private String name;
 
-    @Column(name = "telephone", nullable = false, length = 10)
+    @Column(name = "telephone", nullable = true, length = 10)
     private String telephone;
 
     @Column(name = "kitchenType", nullable = false, length = 100)
@@ -49,7 +49,7 @@ public class Restaurant implements Serializable {
     }
 
     public void setTelephone(String telephone) {
-        this.telephone = telephone;
+    this.telephone = telephone;
     }
 
     public String getName() {

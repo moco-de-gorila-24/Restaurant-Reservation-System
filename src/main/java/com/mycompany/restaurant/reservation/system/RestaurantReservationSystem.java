@@ -8,7 +8,7 @@ import Presentacion.Coordinador.Coordinador;
 
 /**
  *
- * @author luis
+ * @author Luis Alonso Ortiz Aguirre, Jorge Mayorquin Urbina Urias y Carlos Andrés Duarte Mendez
  */
 public class RestaurantReservationSystem {
 
