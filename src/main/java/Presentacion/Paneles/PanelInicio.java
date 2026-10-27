@@ -36,9 +36,9 @@ public class PanelInicio extends JPanel {
         buttonCliente     = new Button("Cliente");
         buttonReservacion = new Button("Reservación");
 
-        //buttonRestaurante.addActionListener(e -> coordinador.mostrarPanelRestaurante());
-        //buttonCliente    .addActionListener(e -> coordinador.mostrarPanelCliente());
-        //buttonReservacion.addActionListener(e -> coordinador.mostrarPanelReservacion());
+        buttonRestaurante.addActionListener(e -> coordinador.mostrarPanelRestaurante());
+        buttonCliente    .addActionListener(e -> coordinador.mostrarPanelCliente());
+        buttonReservacion.addActionListener(e -> coordinador.mostrarPanelReservacion());
 
         gbc.gridx = 0; gbc.gridy = 0;
         panelCentro.add(buttonRestaurante, gbc);

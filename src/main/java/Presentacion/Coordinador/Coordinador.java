@@ -30,15 +30,15 @@ public class Coordinador {
         cambiarPanel(new PanelInicio(this));
     }
 
-    //public void mostrarPanelRestaurante() {
-    //    cambiarPanel(new PanelRestaurante(this));
-    //}
+    public void mostrarPanelRestaurante() {
+        cambiarPanel(new PanelRestaurante(this));
+    }
 
-    //public void mostrarPanelCliente() {
-    //    cambiarPanel(new PanelCliente(this));
-    //}
+    public void mostrarPanelCliente() {
+        cambiarPanel(new PanelCliente(this));
+    }
 
-    //public void mostrarPanelReservacion() {
-    //    cambiarPanel(new PanelReservacion(this));
-    //}
+    public void mostrarPanelReservacion() {
+        cambiarPanel(new PanelReservacion(this));
+    }
 }

@@ -17,5 +17,6 @@ public class FramePrincipal extends JFrame {
         setTitle("Pantalla de Eleccion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false);
     }
 }

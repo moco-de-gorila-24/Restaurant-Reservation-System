@@ -25,8 +25,18 @@ public class Customer implements Serializable {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
+    @ElementCollection
     @Column(name = "telephone", nullable = true, length = 10)
     private List<String> telephone;
+
+    @Column(name = "premium")
+    private boolean premium = false;
+
+    @Column(name = "points")
+    private int points = 0;
+
+    @Column(name = "level")
+    private int level = 0;
 
     public Customer() {
     }
@@ -67,5 +77,29 @@ public class Customer implements Serializable {
 
     public void setTelephone(List<String> telephone) {
         this.telephone = telephone;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public boolean isPremium() {
+        return premium;
+    }
+
+    public void setPremium(boolean premium) {
+        this.premium = premium;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }
