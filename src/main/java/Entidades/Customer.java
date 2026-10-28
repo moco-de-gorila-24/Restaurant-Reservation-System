@@ -5,6 +5,7 @@
 package Entidades;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 
@@ -13,10 +14,11 @@ import javax.persistence.*;
  * @author luis
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Customer implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCustomer;
 
     @Column(name = "name", nullable = false, length = 60)
@@ -26,17 +28,9 @@ public class Customer implements Serializable {
     private String email;
 
     @ElementCollection
+    @CollectionTable(name = "customer_telephones", joinColumns = @JoinColumn(name = "customer_id"))
     @Column(name = "telephone", nullable = true, length = 10)
-    private List<String> telephone;
-
-    @Column(name = "premium")
-    private boolean premium = false;
-
-    @Column(name = "points")
-    private int points = 0;
-
-    @Column(name = "level")
-    private int level = 0;
+    private List<String> telephone = new ArrayList<>();
 
     public Customer() {
     }
@@ -79,27 +73,4 @@ public class Customer implements Serializable {
         this.telephone = telephone;
     }
 
-    public int getPoints() {
-        return points;
-    }
-
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    public boolean isPremium() {
-        return premium;
-    }
-
-    public void setPremium(boolean premium) {
-        this.premium = premium;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
 }

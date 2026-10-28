@@ -5,6 +5,7 @@
     <class>Entidades.Address</class>
     <class>Entidades.Restaurant</class>
     <class>Entidades.Customer</class>
+    <class>Entidades.PremiumCustomer</class>
     <class>Entidades.Reservation</class>
     <class>Entidades.DiningTable</class>
     <properties>
