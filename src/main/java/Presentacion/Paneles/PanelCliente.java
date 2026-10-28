@@ -1,5 +1,8 @@
 package Presentacion.Paneles;
 
+import DAO.CustomerDAO;
+import DTO.CustomerDTO;
+import Interfaces.ICustomerDAO;
 import Presentacion.Componentes.Button;
 import Presentacion.Coordinador.Coordinador;
 
@@ -30,6 +33,8 @@ public class PanelCliente extends JPanel {
 
     private JLabel lblStatus;
     private Long idActual = null;
+    
+    private final ICustomerDAO clienteDAO = new CustomerDAO();
 
     private static class FilaCliente {
         Long id;
@@ -47,6 +52,7 @@ public class PanelCliente extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setBackground(new Color(240, 235, 220));
         construirUI();
+        cargarClientes();
     }
 
     private void construirUI() {
@@ -285,83 +291,120 @@ public class PanelCliente extends JPanel {
     }
 
     private boolean crear() {
-        if (txtNombre.getText().trim().isEmpty()) {
-            mostrarError("El nombre no puede estar vacío.");
+        String nombre = txtNombre.getText().trim();
+        String email = txtEmail.getText().trim();
+        
+        if (nombre.isEmpty() || nombre.length() > 50) {
+            mostrarError("El nombre es obligatorio y no debe superar 50 caracteres.");
             return false;
         }
-        if (txtNombre.getText().trim().length() > 50) {
-            mostrarError("El nombre no puede exceder 50 caracteres.");
-            return false;
-        }
-        if (!EMAIL_PATTERN.matcher(txtEmail.getText().trim()).matches()) {
+
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
             mostrarError("Email inválido. Formato esperado: usuario@dominio.com");
             return false;
         }
 
-        FilaCliente fila = new FilaCliente();
-        fila.id = (long) (filas.size() + 1);
-        fila.nombre = txtNombre.getText().trim();
-        fila.email = txtEmail.getText().trim();
-        fila.telefonos = extraerTelefonos();
-        fila.premium = chkPremium.isSelected();
-        if (fila.premium) {
+        int puntos = 0;
+        int nivel = 1;
+
+        if (chkPremium.isSelected()) {
             try {
-                fila.points = Integer.parseInt(txtPoints.getText().trim());
-            }
-            catch (NumberFormatException ex) {
-                mostrarError("Los puntos deben ser numéricos.");
+                puntos = Integer.parseInt(txtPoints.getText().trim());
+                nivel = Integer.parseInt(txtLevel.getText().trim());
+            } catch (NumberFormatException ex) {
+                mostrarError("Los puntos y el nivel deben ser numéricos.");
                 return false;
             }
-            try {
-                fila.level = Integer.parseInt(txtLevel.getText().trim());
+
+            if (puntos < 0) {
+                mostrarError("Los puntos no pueden ser negativos.");
+                return false;
             }
-            catch (NumberFormatException ex) {
-                mostrarError("El nivel debe ser numérico.");
+
+            if (nivel < 1 || nivel > 5) {
+                mostrarError("El nivel debe estar entre 1 y 5.");
                 return false;
             }
         }
 
-        filas.add(fila);
+        CustomerDTO dto = new CustomerDTO();
+        dto.setName(nombre);
+        dto.setEmail(email);
+        dto.setTelephone(extraerTelefonos());
+        dto.setPremium(chkPremium.isSelected());
+        dto.setPoints(puntos);
+        dto.setLevel(nivel);
+
+        String resultado = clienteDAO.guardar(dto);
+
+        cargarClientes();
+
+        if (esError(resultado)) {
+            mostrarError(resultado);
+            return false;
+        }
+
         limpiar();
-        mostrarExito("Cliente creado con ID " + fila.id + ".");
+        mostrarExito(resultado);
         return true;
     }
 
     private boolean actualizar() {
-        FilaCliente fila = buscarPorId(idActual);
-        if (fila == null) {
-            mostrarError("Cliente no encontrado.");
-            return false;
-        }
-        if (txtNombre.getText().trim().isEmpty()) {
-            mostrarError("El nombre no puede estar vacío.");
-            return false;
-        }
-        if (!EMAIL_PATTERN.matcher(txtEmail.getText().trim()).matches()) {
-            mostrarError("Email inválido. Formato esperado: usuario@dominio.com");
+        if (idActual == null) {
+            mostrarError("Primero selecciona un cliente para actualizar.");
             return false;
         }
 
-        fila.nombre = txtNombre.getText().trim();
-        fila.email = txtEmail.getText().trim();
-        fila.telefonos = extraerTelefonos();
-        fila.premium = chkPremium.isSelected();
+        String nombre = txtNombre.getText().trim();
+        String email = txtEmail.getText().trim();
 
-        if (fila.premium) {
+        if (nombre.isEmpty() || nombre.length() > 50) {
+            mostrarError("El nombre es obligatorio y no debe superar 50 caracteres.");
+            return false;
+        }
+
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            mostrarError("Email inválido.");
+            return false;
+        }
+
+        int puntos = 0;
+        int nivel = 1;
+
+        if (chkPremium.isSelected()) {
             try {
-                fila.points = Integer.parseInt(txtPoints.getText().trim());
+                puntos = Integer.parseInt(txtPoints.getText().trim());
+                nivel = Integer.parseInt(txtLevel.getText().trim());
             } catch (NumberFormatException ex) {
-                fila.points = 0;
+                mostrarError("Los puntos y el nivel deben ser numéricos.");
+                return false;
             }
-            try {
-                fila.level  = Integer.parseInt(txtLevel.getText().trim());
-            } catch (NumberFormatException ex) {
-                fila.level = 0;
+
+            if (puntos < 0 || nivel < 1 || nivel > 5) {
+                mostrarError("Puntos inválidos o nivel fuera del rango 1–5.");
+                return false;
             }
+        }
+
+        CustomerDTO dto = new CustomerDTO();
+        dto.setName(nombre);
+        dto.setEmail(email);
+        dto.setTelephone(extraerTelefonos());
+        dto.setPremium(chkPremium.isSelected());
+        dto.setPoints(puntos);
+        dto.setLevel(nivel);
+
+        String resultado = clienteDAO.actualizar(idActual, dto);
+
+        cargarClientes();
+
+        if (esError(resultado)) {
+            mostrarError(resultado);
+            return false;
         }
 
         limpiar();
-        mostrarExito("Cliente actualizado.");
+        mostrarExito(resultado);
         return true;
     }
 
@@ -392,13 +435,25 @@ public class PanelCliente extends JPanel {
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (r != JOptionPane.YES_OPTION) return false;
 
-        filas.remove(sel);
-        if (idActual != null && idActual.equals(sel.id)) limpiar();
-        mostrarExito("Cliente eliminado.");
+        String resultado = clienteDAO.eliminar(sel.id);
+        cargarClientes();
+
+        if (esError(resultado)) {
+            mostrarError(resultado);
+            return false;
+        }
+
+        if (idActual != null && idActual.equals(sel.id)) {
+            limpiar();
+        }
+
+        mostrarExito(resultado);
         return true;
     }
 
     private boolean accionBuscar() {
+        cargarClientes();
+        
         if (filas.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No hay registros disponibles.",
                     "Aviso", JOptionPane.INFORMATION_MESSAGE);
@@ -506,5 +561,44 @@ public class PanelCliente extends JPanel {
     private FilaCliente buscarPorId(Long id) {
         for (FilaCliente c : filas) if (c.id.equals(id)) return c;
         return null;
+    }
+    
+    private void cargarClientes() {
+        try {
+            List<CustomerDTO> clientes = clienteDAO.consultarTodos();
+
+            filas.clear();
+
+            if (clientes != null) {
+                for (CustomerDTO dto : clientes) {
+                    FilaCliente fila = new FilaCliente();
+
+                    fila.id = dto.getId();
+                    fila.nombre = dto.getName();
+                    fila.email = dto.getEmail();
+
+                    if (dto.getTelephone() != null) {
+                        fila.telefonos = new ArrayList<>(dto.getTelephone());
+                    }
+
+                    fila.premium = dto.isPremium();
+                    fila.points = dto.getPoints();
+                    fila.level = dto.getLevel();
+
+                    filas.add(fila);
+                }
+            }
+        } catch (Exception ex) {
+            mostrarError("No se pudieron cargar los clientes: " + ex.getMessage());
+        }
+    }
+    
+    private boolean esError(String mensaje) {
+        if (mensaje == null) {
+            return true;
+        }
+
+        String texto = mensaje.toLowerCase();
+        return texto.contains("error") || texto.contains("no se pudo") || texto.contains("inválido") || texto.contains("invalido") || texto.contains("ya existe") || texto.contains("no encontrado");
     }
 }

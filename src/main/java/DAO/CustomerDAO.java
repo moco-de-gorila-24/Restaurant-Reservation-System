@@ -12,6 +12,7 @@ import Interfaces.ICustomerDAO;
 import Mappers.CustomerMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
@@ -21,10 +22,15 @@ import javax.persistence.EntityTransaction;
  */
 public class CustomerDAO implements ICustomerDAO {
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}$");
+    private static final Pattern TELEFONO_PATTERN = Pattern.compile("\\d{10}");
+    
     @Override
     public String guardar(CustomerDTO cliente) {
-        if (cliente == null) {
-            return "Error: los datos del cliente son obligatorios.";
+        String error = validarCliente(cliente);
+
+        if (error != null) {
+            return error;
         }
 
         Customer entity = CustomerMapper.toEntity(cliente);
@@ -62,6 +68,12 @@ public class CustomerDAO implements ICustomerDAO {
     public String actualizar(Long id, CustomerDTO cliente) {
         if (id == null || cliente == null) {
             return "Error: se requiere el ID y los datos del cliente.";
+        }
+        
+        String error = validarCliente(cliente);
+
+        if (error != null) {
+            return error;
         }
 
         EntityManager em = null;
@@ -134,6 +146,13 @@ public class CustomerDAO implements ICustomerDAO {
                 return "No se encontró el cliente.";
             }
 
+            Long cantidad = em.createQuery("SELECT COUNT(r) FROM Reservation r WHERE r.customer.idCustomer = :id", Long.class).setParameter("id", id).getSingleResult();
+
+            if (cantidad > 0) {
+                tx.rollback();
+                return "Error: no se puede eliminar el cliente porque tiene reservaciones asociadas.";
+            }
+            
             em.remove(cliente);
             tx.commit();
 
@@ -200,5 +219,39 @@ public class CustomerDAO implements ICustomerDAO {
                 em.close();
             }
         }
+    }
+    
+    private String validarCliente(CustomerDTO cliente) {
+        if (cliente == null) {
+            return "Error: los datos del cliente son obligatorios.";
+        }
+
+        if (cliente.getName() == null || cliente.getName().trim().isEmpty() || cliente.getName().trim().length() > 50) {
+            return "Error: el nombre es obligatorio y debe tener máximo 50 caracteres.";
+        }
+
+        if (cliente.getEmail() == null || !EMAIL_PATTERN.matcher(cliente.getEmail().trim()).matches()) {
+            return "Error: el correo electrónico no tiene un formato válido.";
+        }
+
+        if (cliente.getTelephone() != null) {
+            for (String telefono : cliente.getTelephone()) {
+                if (telefono != null && !telefono.isEmpty() && !TELEFONO_PATTERN.matcher(telefono).matches()) {
+                    return "Error: cada teléfono debe contener exactamente 10 dígitos.";
+                }
+            }
+        }
+
+        if (cliente.isPremium()) {
+            if (cliente.getPoints() < 0) {
+                return "Error: los puntos no pueden ser negativos.";
+            }
+
+            if (cliente.getLevel() < 1 || cliente.getLevel() > 5) {
+                return "Error: el nivel Premium debe estar entre 1 y 5.";
+            }
+        }
+
+        return null;
     }
 }
