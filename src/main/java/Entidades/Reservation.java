@@ -16,7 +16,7 @@ public class Reservation implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idReservation;
 
-    @Column(name = "date", nullable = false, length = 10) //dd/mm/yyyy
+    @Column(name = "date", nullable = false) //dd/mm/yyyy
     private LocalDate date;
 
     @Column(name = "hour")

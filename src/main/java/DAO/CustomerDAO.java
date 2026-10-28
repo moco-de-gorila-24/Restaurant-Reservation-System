@@ -162,7 +162,7 @@ public class CustomerDAO implements ICustomerDAO {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
             }
-            return "No se pudo eliminar el cliente, puede tener reservaciones asociadas. " + ex.getMessage();
+            return "Error al eliminar el cliente: " + ex.getMessage();
 
         } finally {
             if (em != null && em.isOpen()) {
