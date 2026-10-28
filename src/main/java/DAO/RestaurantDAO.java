@@ -190,7 +190,7 @@ public class RestaurantDAO implements IRestaurantDAO {
     }
 
     /**
-     * Comprueba los datos antes de persistir.
+     * Valida los datos antes de persistir.
      */
     private boolean datosValidos(RestaurantDTO dto) {
         return dto.getName() != null
