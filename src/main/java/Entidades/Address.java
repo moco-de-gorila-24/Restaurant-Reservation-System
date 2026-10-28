@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class Address implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDireccion;
 
     public Long getId() {
@@ -37,6 +37,9 @@ public class Address implements Serializable {
     @Column(name = "number", nullable = true, length = 6) //solo lo puse por legibilidad y por que es simetrico
     private int number;
 
+    @OneToOne(mappedBy = "address")
+    private Restaurant restaurant;
+    
     public Address() {
     }
 
@@ -98,5 +101,13 @@ public class Address implements Serializable {
 
     public void setNumber(int number) {
         this.number = number;
+    }
+    
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
 }

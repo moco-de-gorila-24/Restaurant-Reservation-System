@@ -5,6 +5,8 @@
 package Entidades;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
 
 /**
@@ -15,7 +17,7 @@ import javax.persistence.*;
 public class Restaurant implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRestaurant;
 
     @Column(name = "name", nullable = false, length = 30)
@@ -27,6 +29,13 @@ public class Restaurant implements Serializable {
     @Column(name = "kitchenType", nullable = false, length = 100)
     private String kitchenType;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "address_id", unique = true)
+    private Address address;
+    
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DiningTable> tables = new ArrayList<>();
+    
     public Restaurant() {
     }
 
@@ -66,5 +75,49 @@ public class Restaurant implements Serializable {
 
     public void setKitchenType(String kitchenType) {
         this.kitchenType = kitchenType;
+    }
+    
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+        if (address != null) {
+            address.setRestaurant(this);
+        }
+    }
+
+    public List<DiningTable> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<DiningTable> tables) {
+        this.tables = tables == null ? new ArrayList<>() : tables;
+
+        for (DiningTable table : this.tables) {
+            table.setRestaurant(this);
+        }
+    }
+
+    public boolean agregarMesa(DiningTable table) {
+        if (table == null) {
+            return false;
+        }
+
+        table.setRestaurant(this);
+        return tables.add(table);
+    }
+
+    public boolean quitarMesa(DiningTable table) {
+        if (table == null) {
+            return false;
+        }
+
+        boolean eliminada = tables.remove(table);
+        if (eliminada) {
+            table.setRestaurant(null);
+        }
+        return eliminada;
     }
 }

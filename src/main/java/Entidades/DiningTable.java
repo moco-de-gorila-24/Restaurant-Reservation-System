@@ -23,6 +23,11 @@ public class DiningTable implements Serializable {
 
     @Column(name = "capacity", nullable = false, length = 1)
     private int capacity;
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
+
 
     public DiningTable() {
     }
@@ -55,4 +60,18 @@ public class DiningTable implements Serializable {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+    
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    @Override
+    public String toString() {
+        return "Mesa " + number + " = capacidad: " + capacity;
+    }
+    
 }

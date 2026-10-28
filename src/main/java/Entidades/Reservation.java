@@ -13,7 +13,7 @@ import javax.persistence.*;
 public class Reservation implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idReservation;
 
     @Column(name = "date", nullable = false, length = 10) //dd/mm/yyyy
@@ -21,6 +21,18 @@ public class Reservation implements Serializable {
 
     @Column(name = "hour")
     private LocalTime hour;
+    
+    @Column(name = "number_people", nullable = false)
+    private int numberPeople;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "table_id", nullable = false)
+    private DiningTable diningTable;
+
 
     public Reservation() {
     }
@@ -52,5 +64,29 @@ public class Reservation implements Serializable {
 
     public void setHour(LocalTime hour) {
         this.hour = hour;
+    }
+    
+    public int getNumberPeople() {
+        return numberPeople;
+    }
+
+    public void setNumberPeople(int numberPeople) {
+        this.numberPeople = numberPeople;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public DiningTable getDiningTable() {
+        return diningTable;
+    }
+
+    public void setDiningTable(DiningTable diningTable) {
+        this.diningTable = diningTable;
     }
 }
