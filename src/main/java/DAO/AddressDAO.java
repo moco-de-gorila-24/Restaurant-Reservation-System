@@ -10,6 +10,8 @@ import Entidades.Address;
 import Entidades.Restaurant;
 import Interfaces.IAddressDAO;
 import Mappers.AddressMapper;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -20,6 +22,33 @@ import javax.persistence.EntityTransaction;
  * @author ACER
  */
 public class AddressDAO implements IAddressDAO {
+
+    @Override
+    public boolean agregar(AddressDTO addressDTO) {
+        AddressMapper am = new AddressMapper();
+        EntityManager em = JPAUtil.crearEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try{
+            am.toEntity(addressDTO);
+
+            tx.begin();
+
+            em.persist(addressDTO);
+
+            tx.commit();
+
+        }
+        catch (Exception e){
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+        }
+        finally {
+            em.close();
+        }
+        return false;
+    }
 
     @Override
     public String actualizar(Long id, AddressDTO dto) {
@@ -37,7 +66,12 @@ public class AddressDAO implements IAddressDAO {
                 return "No se encontró la dirección.";
             }
 
-            Restaurant restaurant = address.getRestaurant();
+            Restaurant restaurant = em.createQuery(
+                            "SELECT r FROM Restaurant r WHERE r.address = :address", Restaurant.class)
+                    .setParameter("address", address)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
 
             if (restaurant == null) {
                 return "Error: la dirección no está asociada a un restaurante.";
@@ -86,7 +120,12 @@ public class AddressDAO implements IAddressDAO {
                 return "No se encontró la dirección.";
             }
 
-            Restaurant restaurant = address.getRestaurant();
+            Restaurant restaurant = em.createQuery(
+                            "SELECT r FROM Restaurant r WHERE r.address = :address", Restaurant.class)
+                    .setParameter("address", address)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
 
             if (restaurant == null) {
                 return "Error: la dirección no tiene un restaurante asociado.";

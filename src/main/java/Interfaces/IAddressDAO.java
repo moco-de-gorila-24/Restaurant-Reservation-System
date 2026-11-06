@@ -12,6 +12,7 @@ import java.util.List;
  * @author ACER
  */
 public interface IAddressDAO {
+    boolean agregar(AddressDTO addressDTO);
     String actualizar(Long id, AddressDTO direccion);
     String eliminar(Long id);
     AddressDTO consultarPorId(Long id);

@@ -83,9 +83,6 @@ public class Restaurant implements Serializable {
 
     public void setAddress(Address address) {
         this.address = address;
-        if (address != null) {
-            address.setRestaurant(this);
-        }
     }
 
     public List<DiningTable> getTables() {
