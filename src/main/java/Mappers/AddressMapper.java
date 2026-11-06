@@ -25,11 +25,22 @@ public class AddressMapper {
         dto.setPostCode(entity.getPostCode());
         dto.setCity(entity.getCity());
         dto.setNumber(entity.getNumber());
-
-        if (entity.getRestaurant() != null) {
-            dto.setRestaurantId(entity.getRestaurant().getId());
-        }
-
+        
         return dto;
+    }
+
+    public static Address toEntity(AddressDTO addressDTO){
+        if (addressDTO == null){
+            return null;
+        }
+        Address address = new Address();
+        address.setId(addressDTO.getId());
+        address.setStreet(addressDTO.getStreet());
+        address.setState(addressDTO.getState());
+        address.setPostCode(addressDTO.getPostCode());
+        address.setCity(addressDTO.getCity());
+        address.setNumber(addressDTO.getNumber());
+
+        return address;
     }
 }
