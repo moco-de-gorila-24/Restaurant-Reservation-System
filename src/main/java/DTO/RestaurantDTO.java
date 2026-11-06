@@ -25,6 +25,20 @@ public class RestaurantDTO {
     public RestaurantDTO() {
     }
 
+    public RestaurantDTO(String name, String telephone, String kitchenType, Long addressId, String street, String state, int postCode, String city, int number) {
+
+        this.id = id;
+        this.name = name;
+        this.telephone = telephone;
+        this.kitchenType = kitchenType;
+        this.addressId = addressId;
+        this.street = street;
+        this.state = state;
+        this.postCode = postCode;
+        this.city = city;
+        this.number = number;
+    }
+
     public RestaurantDTO(Long id, String name, String telephone, String kitchenType, Long addressId, String street, String state, int postCode, String city, int number) {
 
         this.id = id;

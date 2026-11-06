@@ -21,14 +21,21 @@ public class AddressDTO {
     public AddressDTO() {
     }
 
-    public AddressDTO(Long id, String street, String state, int postCode, String city, int number, Long restaurantId) {
+    public AddressDTO(String street, String state, int postCode, String city, int number) {
+        this.street = street;
+        this.state = state;
+        this.postCode = postCode;
+        this.city = city;
+        this.number = number;
+    }
+
+    public AddressDTO(Long id, String street, String state, int postCode, String city, int number) {
         this.id = id;
         this.street = street;
         this.state = state;
         this.postCode = postCode;
         this.city = city;
         this.number = number;
-        this.restaurantId = restaurantId;
     }
 
     public Long getId() {
@@ -79,7 +86,4 @@ public class AddressDTO {
         return restaurantId;
     }
     
-    public void setRestaurantId(Long restaurantId) {
-        this.restaurantId = restaurantId;
-    }
 }

@@ -19,6 +19,13 @@ public class DiningTableDTO {
     public DiningTableDTO() {
     }
 
+    public DiningTableDTO(int number, int capacity, Long restaurantId, String restaurantName) {
+        this.number = number;
+        this.capacity = capacity;
+        this.restaurantId = restaurantId;
+        this.restaurantName = restaurantName;
+    }
+
     public DiningTableDTO(Long id, int number, int capacity, Long restaurantId, String restaurantName) {
         this.id = id;
         this.number = number;

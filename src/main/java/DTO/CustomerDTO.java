@@ -24,6 +24,15 @@ public class CustomerDTO {
     public CustomerDTO() {
     }
 
+    public CustomerDTO(String name, String email, List<String> telephone, boolean premium, int points, int level) {
+        this.name = name;
+        this.email = email;
+        setTelephone(telephone);
+        this.premium = premium;
+        this.points = points;
+        this.level = level;
+    }
+
     public CustomerDTO(Long id, String name, String email, List<String> telephone, boolean premium, int points, int level) {
         this.id = id;
         this.name = name;

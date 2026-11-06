@@ -28,6 +28,17 @@ public class ReservationDTO {
     public ReservationDTO() {
     }
 
+    public ReservationDTO(LocalDate date, LocalTime hour, int numberPeople, Long customerId, String customerName, Long tableId, int tableNumber, int tableCapacity) {
+        this.date = date;
+        this.hour = hour;
+        this.numberPeople = numberPeople;
+        this.customerId = customerId;
+        this.customerName = customerName;
+        this.tableId = tableId;
+        this.tableNumber = tableNumber;
+        this.tableCapacity = tableCapacity;
+    }
+
     public ReservationDTO(Long id, LocalDate date, LocalTime hour, int numberPeople, Long customerId, String customerName, Long tableId, int tableNumber, int tableCapacity) {
         this.id = id;
         this.date = date;
