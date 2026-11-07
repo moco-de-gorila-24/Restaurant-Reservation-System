@@ -8,11 +8,17 @@ import DTO.AddressDTO;
 import Entidades.Address;
 
 /**
- *
+ * Clase encargada de convertir objetos entre la entidad Address y AddressDTO.
+ * 
  * @author ACER
  */
 public class AddressMapper {
 
+    /**
+     * Convierte una entidad Address a un AddressDTO.
+     * @param entity Entidad de la base de datos.
+     * @return DTO con los datos, o null si la entidad es nula.
+     */
     public static AddressDTO toDTO(Address entity) {
         if (entity == null) {
             return null;
@@ -28,7 +34,12 @@ public class AddressMapper {
 
         return dto;
     }
-
+    
+    /**
+     * Convierte un AddressDTO a una entidad Address.
+     * @param addressDTO DTO con los datos.
+     * @return Entidad lista para persistir, o null si el DTO es nulo.
+     */
     public static Address toEntity(AddressDTO addressDTO){
         if (addressDTO == null){
             return null;

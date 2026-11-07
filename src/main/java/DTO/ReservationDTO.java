@@ -8,7 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- *
+ * Objeto de Transferencia de Datos (DTO) para la entidad Reservation.
+ * 
  * @author ACER
  */
 public class ReservationDTO {

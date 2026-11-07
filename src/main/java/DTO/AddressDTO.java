@@ -5,7 +5,9 @@
 package DTO;
 
 /**
- *
+ * Objeto de Transferencia de Datos (DTO) para la entidad Address.
+ * Se utiliza para transportar los datos de la dirección entre la vista y la base de datos.
+ * 
  * @author ACER
  */
 public class AddressDTO {

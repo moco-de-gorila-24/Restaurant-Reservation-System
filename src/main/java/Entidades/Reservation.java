@@ -10,7 +10,9 @@ import java.time.LocalTime;
 import javax.persistence.*;
 
 /**
- *
+ * Entidad JPA que representa una reservación realizada por un cliente en una mesa específica.
+ * Almacena la fecha, hora de inicio, hora de fin y el número de personas.
+ * 
  * @author luis
  */
 @Entity

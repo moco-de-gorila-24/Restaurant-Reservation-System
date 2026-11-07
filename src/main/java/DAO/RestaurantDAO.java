@@ -16,11 +16,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- *
+ * Implementación de IRestaurantDAO para gestionar la persistencia de restaurantes.
+ * 
  * @author ACER
  */
 public class RestaurantDAO implements IRestaurantDAO {
 
+    /**
+     * Guarda un restaurante en la base de datos.
+     * @param dto Datos del restaurante.
+     * @return El ID generado o null si falla.
+     */
     @Override
     public Long guardar(RestaurantDTO dto) {
         if (dto == null || !datosValidos(dto)) {
@@ -62,7 +68,13 @@ public class RestaurantDAO implements IRestaurantDAO {
             }
         }
     }
-
+    
+    /**
+     * Actualiza los datos de un restaurante.
+     * @param id ID del restaurante.
+     * @param dto Nuevos datos.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String actualizar(Long id, RestaurantDTO dto) {
         if (id == null || dto == null) {
@@ -106,7 +118,12 @@ public class RestaurantDAO implements IRestaurantDAO {
             }
         }
     }
-
+    
+    /**
+     * Elimina un restaurante de la BD.
+     * @param id ID del restaurante.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String eliminar(Long id) {
         if (id == null) {
@@ -145,7 +162,12 @@ public class RestaurantDAO implements IRestaurantDAO {
             }
         }
     }
-
+    
+    /**
+     * Consulta un restaurante por ID.
+     * @param id ID del restaurante.
+     * @return RestaurantDTO.
+     */
     @Override
     public RestaurantDTO consultarPorId(Long id) {
         if (id == null) {
@@ -169,6 +191,10 @@ public class RestaurantDAO implements IRestaurantDAO {
         }
     }
 
+    /**
+     * Consulta todos los restaurantes.
+     * @return Lista de RestaurantDTO.
+     */
     @Override
     public List<RestaurantDTO> consultarTodos() {
         EntityManager em = null;
@@ -195,7 +221,9 @@ public class RestaurantDAO implements IRestaurantDAO {
     }
 
     /**
-     * Valida los datos antes de persistir.
+     * Valida que los campos del restaurante sean correctos antes de guardar.
+     * @param dto DTO a validar.
+     * @return true si los datos son válidos.
      */
     private boolean datosValidos(RestaurantDTO dto) {
         String name = dto.getName();

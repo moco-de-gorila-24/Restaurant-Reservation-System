@@ -10,7 +10,9 @@ import java.util.List;
 import javax.persistence.*;
 
 /**
- *
+ * Entidad JPA que representa un restaurante en el sistema.
+ * Contiene relaciones con su dirección y sus mesas asociadas.
+ * 
  * @author luis
  */
 @Entity
@@ -102,6 +104,12 @@ public class Restaurant implements Serializable {
         return this;
     }
 
+    /**
+     * Agrega una mesa al restaurante y establece la relación bidireccional.
+     * 
+     * @param table Mesa a agregar.
+     * @return true si se agregó correctamente.
+     */
     public boolean agregarMesa(DiningTable table) {
         if (table == null) {
             return false;
@@ -111,6 +119,12 @@ public class Restaurant implements Serializable {
         return tables.add(table);
     }
 
+    /**
+     * Quita una mesa del restaurante y rompe la relación bidireccional.
+     * 
+     * @param table Mesa a quitar.
+     * @return true si se eliminó correctamente.
+     */
     public boolean quitarMesa(DiningTable table) {
         if (table == null) {
             return false;

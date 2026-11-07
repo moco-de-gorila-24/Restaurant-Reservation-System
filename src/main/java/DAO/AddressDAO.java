@@ -18,11 +18,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- *
+ * Implementación de IAddressDAO para gestionar la persistencia de direcciones en la BD.
+ * 
  * @author ACER
  */
 public class AddressDAO implements IAddressDAO {
-
+    
+    /**
+     * Guarda una dirección en la base de datos.
+     * @param addressDTO Datos de la dirección.
+     * @return El ID autogenerado de la dirección.
+     */
     @Override
     public Long agregar(AddressDTO addressDTO) {
         AddressMapper am = new AddressMapper();
@@ -47,7 +53,13 @@ public class AddressDAO implements IAddressDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Actualiza una dirección existente validando que pertenezca al restaurante.
+     * @param id ID de la dirección.
+     * @param dto Nuevos datos.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String actualizar(Long id, AddressDTO dto) {
         if (id == null || id <= 0 || dto == null) {
@@ -101,7 +113,12 @@ public class AddressDAO implements IAddressDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Elimina una dirección de la base de datos.
+     * @param id ID de la dirección.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String eliminar(Long id) {
         if (id == null || id <= 0) {
@@ -148,7 +165,12 @@ public class AddressDAO implements IAddressDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Consulta una dirección por su ID.
+     * @param id ID de la dirección.
+     * @return AddressDTO o null.
+     */
     @Override
     public AddressDTO consultarPorId(Long id) {
         if (id == null || id <= 0) {
@@ -169,7 +191,11 @@ public class AddressDAO implements IAddressDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Consulta todas las direcciones.
+     * @return Lista de AddressDTO.
+     */
     @Override
     public List<AddressDTO> consultarTodos() {
         EntityManager em = JPAUtil.crearEntityManager();

@@ -17,7 +17,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- *
+ * Implementación del DAO para la entidad Customer.
+ * Maneja la persistencia y las validaciones de formato de correo, nombre y teléfono.
+ * 
  * @author ACER
  */
 public class CustomerDAO implements ICustomerDAO {
@@ -25,6 +27,11 @@ public class CustomerDAO implements ICustomerDAO {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}$");
     private static final Pattern TELEFONO_PATTERN = Pattern.compile("\\d{10}");
     
+    /**
+     * Guarda un cliente ya sea normal o premium en la base de datos.
+     * @param cliente DTO con los datos del cliente.
+     * @return Mensaje indicando exito o el error de validación.
+     */
     @Override
     public String guardar(CustomerDTO cliente) {
         String error = validarCliente(cliente);
@@ -221,6 +228,13 @@ public class CustomerDAO implements ICustomerDAO {
         }
     }
     
+    /**
+     * Método auxiliar privado para validar las reglas de negocio antes de guardar o actualizar.
+     * Verifica longitudes, formatos de email, 10 dígitos en teléfonos y rangos de puntos/nivel.
+     * 
+     * @param cliente DTO del cliente a validar.
+     * @return null si todo es válido, o un String con el mensaje de error.
+     */
     private String validarCliente(CustomerDTO cliente) {
         if (cliente == null) {
             return "Error: los datos del cliente son obligatorios.";

@@ -8,7 +8,8 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- *
+ * Entidad JPA que representa una mesa física dentro de un restaurante.
+ * 
  * @author luis
  */
 @Entity

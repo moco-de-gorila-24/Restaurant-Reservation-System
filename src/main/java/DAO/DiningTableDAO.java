@@ -18,11 +18,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- *
+ * Implementación de IDiningTableDAO. Gestiona las mesas y evita la eliminación 
+ * de mesas que ya tienen reservaciones asociadas.
+ * 
  * @author ACER
  */
 public class DiningTableDAO implements IDiningTableDAO {
-
+    
+    /**
+     * Guarda una lista de mesas para un restaurante, validando que no haya números repetidos.
+     * @param mesas Lista de DTOs de las mesas.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String guardar(List<DiningTableDTO> mesas) {
         System.out.println("entró a guardar mesas, cantidad=" + (mesas == null ? "null" : mesas.size()));
@@ -87,7 +94,13 @@ public class DiningTableDAO implements IDiningTableDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Actualiza los datos de una mesa.
+     * @param id ID de la mesa.
+     * @param mesa DTO con nuevos datos.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String actualizar(Long id, DiningTableDTO mesa) {
         if (id == null || id <= 0 || !datosValidos(mesa)) {
@@ -140,7 +153,12 @@ public class DiningTableDAO implements IDiningTableDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Elimina una mesa si no tiene reservaciones asociadas.
+     * @param id ID de la mesa.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String eliminar(Long id) {
         if (id == null || id <= 0) {
@@ -183,7 +201,12 @@ public class DiningTableDAO implements IDiningTableDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Consulta una mesa por ID.
+     * @param id ID de la mesa.
+     * @return DiningTableDTO.
+     */
     @Override
     public DiningTableDTO consultarPorId(Long id) {
         if (id == null || id <= 0) {
@@ -205,6 +228,10 @@ public class DiningTableDAO implements IDiningTableDAO {
         }
     }
 
+    /**
+     * Consulta todas las mesas.
+     * @return Lista de DiningTableDTO.
+     */
     @Override
     public List<DiningTableDTO> consultarTodos() {
         EntityManager em = JPAUtil.crearEntityManager();
@@ -228,7 +255,12 @@ public class DiningTableDAO implements IDiningTableDAO {
             em.close();
         }
     }
-
+    
+    /**
+     * Consulta las mesas de un restaurante específico.
+     * @param restaurantId ID del restaurante.
+     * @return Lista de DiningTableDTO.
+     */
     @Override
     public List<DiningTableDTO> consultarPorRestaurante(Long restaurantId) {
         if (restaurantId == null || restaurantId <= 0) {
@@ -260,6 +292,11 @@ public class DiningTableDAO implements IDiningTableDAO {
         }
     }
 
+    /**
+     * Valida que el DTO de la mesa tenga datos coherentes.
+     * @param mesa DTO a validar.
+     * @return true si es válido.
+     */
     private boolean datosValidos(DiningTableDTO mesa) {
         return mesa != null
                 && mesa.getNumber() > 0

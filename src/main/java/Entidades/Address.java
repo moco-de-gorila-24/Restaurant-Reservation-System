@@ -8,7 +8,8 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- *
+ * Entidad JPA que representa la dirección física de un restaurante.
+ * 
  * @author luis
  */
 @Entity

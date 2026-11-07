@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Objeto de Transferencia de Datos (DTO) para la entidad Customer.
+ * Incluye campos para manejar la herencia de PremiumCustomer.
+ * 
  * @author ACER
  */
 public class CustomerDTO {

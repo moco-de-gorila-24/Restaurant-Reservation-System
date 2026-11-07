@@ -10,7 +10,9 @@ import java.util.List;
 import javax.persistence.*;
 
 /**
- *
+ * Entidad JPA que representa a un cliente del sistema.
+ * Utiliza la estrategia de herencia JOINED para diferenciar a los clientes normales de los Premium.
+ * 
  * @author luis
  */
 @Entity

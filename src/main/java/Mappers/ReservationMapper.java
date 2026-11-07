@@ -10,11 +10,17 @@ import Entidades.DiningTable;
 import Entidades.Reservation;
 
 /**
- *
+ * Clase adaptadora para convertir entre la entidad Reservation y ReservationDTO.
+ * 
  * @author ACER
  */
 public class ReservationMapper {
-
+    
+    /**
+     * Convierte una entidad Reservation a ReservationDTO.
+     * @param entity Entidad de la reservación.
+     * @return DTO con los datos.
+     */
     public static ReservationDTO toDTO(Reservation entity) {
         if (entity == null) {
             return null;
@@ -41,7 +47,15 @@ public class ReservationMapper {
 
         return dto;
     }
-
+    
+    
+    /**
+     * Crea una entidad Reservation a partir de un DTO y sus relaciones.
+     * @param dto Datos de la reservación.
+     * @param customer Cliente asociado.
+     * @param table Mesa asociada.
+     * @return Entidad lista para persistir.
+     */
     public static Reservation toEntity(ReservationDTO dto, Customer customer, DiningTable table) {
 
         if (dto == null || customer == null || table == null) {
@@ -56,7 +70,14 @@ public class ReservationMapper {
 
         return entity;
     }
-
+    
+    /**
+     * Actualiza una entidad Reservation existente.
+     * @param entity Entidad a modificar.
+     * @param dto Nuevos datos.
+     * @param customer Nuevo cliente.
+     * @param table Nueva mesa.
+     */
     public static void actualizarEntidad(Reservation entity, ReservationDTO dto, Customer customer, DiningTable table) {
 
         if (entity == null || dto == null || customer == null || table == null) {

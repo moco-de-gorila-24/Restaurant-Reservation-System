@@ -5,7 +5,8 @@
 package DTO;
 
 /**
- *
+ * Objeto de Transferencia de Datos (DTO) para la entidad Restaurant.
+ * 
  * @author ACER
  */
 public class RestaurantDTO {

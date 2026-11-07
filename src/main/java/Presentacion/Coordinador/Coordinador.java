@@ -12,7 +12,9 @@ import Presentacion.Paneles.PanelRestaurante;
 import javax.swing.*;
 
 /**
- *
+ * Clase controladora central encargada de gestionar la navegación 
+ * entre los diferentes paneles de la aplicación.
+ * 
  * @author ACER
  */
 public class Coordinador {

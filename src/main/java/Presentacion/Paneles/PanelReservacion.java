@@ -32,12 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Panel de interfaz gráfica para la gestión (CRUD) de reservaciones.
+ * Incluye la lógica visual para el feedback de puntos y niveles de clientes Premium.
  * 
  * @author Andres
- */
-
-/**
- * Panel con funcionalidades CRUD de reservación
  */
 public class PanelReservacion extends JPanel {
 
@@ -77,6 +75,9 @@ public class PanelReservacion extends JPanel {
         cbRestaurante.addActionListener(e -> cargarMesas());
     }
 
+    /**
+     * Construye los componentes visuales del panel.
+     */
     private void construirUI() {
         add(construirHeader(), BorderLayout.NORTH);
         add(construirFormulario(), BorderLayout.CENTER);
@@ -93,6 +94,9 @@ public class PanelReservacion extends JPanel {
         add(sur, BorderLayout.SOUTH);
     }
 
+    /**
+     * Construye los componentes visuales del panel.
+     */
     private JPanel construirHeader() {
         JPanel norte = new JPanel(new BorderLayout());
         norte.setOpaque(false);
@@ -115,6 +119,10 @@ public class PanelReservacion extends JPanel {
         return norte;
     }
 
+    /**
+     * Construye el formulario con los ComboBox y campos de fecha/hora.
+     * @return Panel del formulario.
+     */
     private JPanel construirFormulario() {
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setOpaque(false);
@@ -222,7 +230,11 @@ public class PanelReservacion extends JPanel {
         contenedor.add(panelGuardar, BorderLayout.SOUTH);
         return contenedor;
     }
-
+    
+    /**
+     * Construye la barra de botones inferior.
+     * @return Panel de botones.
+     */
     private JPanel construirBarraBotones() {
         JPanel barra = new JPanel(new BorderLayout());
         barra.setOpaque(false);
@@ -256,7 +268,11 @@ public class PanelReservacion extends JPanel {
 
         return barra;
     }
-
+    
+    /**
+     * Helper para crear botones.
+     * @return JButton configurado.
+     */
     private JButton boton(String texto, Color color, int w, int h) {
         JButton b = new JButton(texto);
         b.setBackground(color);
@@ -268,24 +284,49 @@ public class PanelReservacion extends JPanel {
         return b;
     }
 
+    /**
+     * Muestra un mensaje de error en la barra de estado.
+     * @param msg Mensaje.
+     */
     private void mostrarError(String msg) {
         lblStatus.setForeground(new Color(190, 40, 40));
         lblStatus.setText("⚠ " + msg);
     }
 
+    /**
+     * Muestra un mensaje de éxito en la barra de estado.
+     * @param msg Mensaje.
+     */
     private void mostrarExito(String msg) {
         lblStatus.setForeground(new Color(40, 140, 40));
         lblStatus.setText("✔ " + msg);
     }
 
+    /**
+     * Formatea los datos de una mesa para mostrarlos en texto.
+     * @param m Entidad mesa.
+     * @return String formateado.
+     */
     private String formatoMesa(DiningTable m) {
         return "Mesa " + m.getNumber() + " (cap " + m.getCapacity() + ")";
     }
-
+    
+    /**
+     * Delega la acción de guardar según si es creación o actualización.
+     * @return true si la operación fue exitosa.
+     */
     private boolean guardar() {
         return idActual == null ? crear() : actualizar();
     }
 
+    /**
+     * Crea una nueva reservación.
+     * Incluye lógica de Feedback Visual: Si el cliente es Premium, al finalizar 
+     * la reservación exitosamente, se calcula la diferencia de puntos antes y después 
+     * y se muestra un JOptionPane indicando al usuario cuántos puntos ganó/perdió 
+     * y si subió/bajó de nivel.
+     * @return true si se guardó correctamente.
+     */
     private boolean crear() {
         ReservationDTO reservacion = obtenerDatosFormulario();
 
@@ -332,6 +373,11 @@ public class PanelReservacion extends JPanel {
         return false;
     }
     
+    /**
+     * Actualiza una reservación existente, aplicando la misma lógica
+     * visual para clientes Premium que el método crear().
+     * @return true si se actualizó correctamente.
+     */
     private boolean actualizar() {
         if (idActual == null) {
             mostrarError("Primero selecciona una reservación para actualizar.");
@@ -381,6 +427,12 @@ public class PanelReservacion extends JPanel {
         return false;
     }
 
+    /**
+     * Valida que el número de personas no exceda la capacidad ni deje espacios vacíos no permitidos.
+     * @param mesa DTO de la mesa.
+     * @param personas Número de personas.
+     * @return true si es válido.
+     */
     private boolean validarPersonas(DiningTable mesa, int personas) {
         if (personas <= 0) {
             mostrarError("El número de personas debe ser mayor a 0.");
@@ -399,6 +451,10 @@ public class PanelReservacion extends JPanel {
         return true;
     }
 
+    /**
+     * Acción del botón Actualizar: carga una reservación seleccionada.
+     * @return true si se cargó correctamente.
+     */
     private boolean accionActualizar() {
         ReservationDTO sel = mostrarDialogoSeleccion("Seleccionar reservación a actualizar", "Editar");
 
@@ -452,6 +508,10 @@ public class PanelReservacion extends JPanel {
         return true;
     }
 
+    /**
+     * Acción del botón Eliminar.
+     * @return true si se eliminó correctamente.
+     */
     private boolean accionEliminar() {
         ReservationDTO sel = mostrarDialogoSeleccion("Seleccionar reservación a eliminar", "Eliminar");
 
@@ -482,6 +542,10 @@ public class PanelReservacion extends JPanel {
         return false;
     }
 
+    /**
+     * Acción del botón Buscar.
+     * @return true si hay registros y se abre el diálogo.
+     */
     private boolean accionBuscar() {
         cargarReservaciones();
 
@@ -492,8 +556,12 @@ public class PanelReservacion extends JPanel {
 
         mostrarDialogoBusqueda();
         return true;
-}
+    }
 
+     /**
+     * Muestra el diálogo modal de selección de reservaciones.
+     * @return ReservationDTO seleccionada o null.
+     */
     private ReservationDTO mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
         cargarReservaciones();
 
@@ -548,6 +616,9 @@ public class PanelReservacion extends JPanel {
         return seleccion[0];
     }
 
+    /**
+     * Muestra el diálogo de búsqueda con la tabla de todas las reservaciones.
+     */
     private void mostrarDialogoBusqueda() {
         cargarReservaciones();
 
@@ -574,22 +645,30 @@ public class PanelReservacion extends JPanel {
         dlg.setVisible(true);
     }
 
-   private DefaultTableModel crearModeloTabla() {
-        String[] columnas = {"ID", "Cliente", "Mesa", "Capacidad", "Fecha", "Hora", "Personas"};
+    /**
+      * Genera el modelo de la tabla para las reservaciones.
+      * @return DefaultTableModel.
+      */
+    private DefaultTableModel crearModeloTabla() {
+         String[] columnas = {"ID", "Cliente", "Mesa", "Capacidad", "Fecha", "Hora", "Personas"};
 
-        DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int fila, int columna) {
-                return false;
-            }
-        };
+         DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
+             @Override
+             public boolean isCellEditable(int fila, int columna) {
+                 return false;
+             }
+         };
 
-        for (ReservationDTO r : reservaciones) {
-            modelo.addRow(new Object[]{r.getId(), r.getCustomerName(), r.getTableNumber(), r.getTableCapacity(), r.getDate(), r.getHour(), r.getNumberPeople()});
-        }
+         for (ReservationDTO r : reservaciones) {
+             modelo.addRow(new Object[]{r.getId(), r.getCustomerName(), r.getTableNumber(), r.getTableCapacity(), r.getDate(), r.getHour(), r.getNumberPeople()});
+         }
 
-        return modelo;
+         return modelo;
     }
+    
+    /**
+     * Limpia los campos del formulario.
+     */
     private void limpiar() {
         idActual = null;
         if (cbCliente.getItemCount() > 0) cbCliente.setSelectedIndex(0);
@@ -599,6 +678,9 @@ public class PanelReservacion extends JPanel {
         lblStatus.setText(" ");
     }
     
+    /**
+     * Carga los clientes, restaurantes y mesas desde la BD para llenar los ComboBox.
+     */
     private void cargarDatosIniciales() {
         try {
             clientes = clienteDAO.consultarTodos();
@@ -623,6 +705,9 @@ public class PanelReservacion extends JPanel {
         }
     }
     
+    /**
+     * Carga las mesas del restaurante seleccionado en el ComboBox de mesas.
+     */
     private void cargarMesas() {
 
         cbMesa.removeAllItems();
@@ -643,18 +728,34 @@ public class PanelReservacion extends JPanel {
         }
     }
     
+    /**
+     * Obtiene el cliente seleccionado en el ComboBox.
+     * @return CustomerDTO o null.
+     */
     private CustomerDTO obtenerClienteSeleccionado() {
         return (CustomerDTO) cbCliente.getSelectedItem();
     }
 
+    /**
+     * Obtiene el restaurante seleccionado en el ComboBox.
+     * @return RestaurantDTO o null.
+     */
     private RestaurantDTO obtenerRestauranteSeleccionado() {
         return (RestaurantDTO) cbRestaurante.getSelectedItem();
     }
 
+    /**
+     * Obtiene la mesa seleccionada en el ComboBox.
+     * @return DiningTableDTO o null.
+     */
     private DiningTableDTO obtenerMesaSeleccionada() {
         return (DiningTableDTO) cbMesa.getSelectedItem();
     }
-
+    
+    /**
+     * Extrae y valida todos los datos del formulario para construir un ReservationDTO.
+     * @return ReservationDTO listo para guardar o null si hay errores de validación.
+     */
     private ReservationDTO obtenerDatosFormulario() {
         CustomerDTO cliente = obtenerClienteSeleccionado();
         DiningTableDTO mesa = obtenerMesaSeleccionada();
@@ -705,6 +806,12 @@ public class PanelReservacion extends JPanel {
         return new ReservationDTO(fecha, hora, personas, cliente.getId(), cliente.getName(), mesa.getId(), mesa.getNumber(), mesa.getCapacity());
     }
 
+    /**
+     * Valida si las personas caben en la mesa según las reglas básicas.
+     * @param mesa DTO de la mesa.
+     * @param personas Número de personas.
+     * @return true si es válido.
+     */
     private boolean validarPersonas(DiningTableDTO mesa, int personas) {
         if (personas <= 0) {
             mostrarError("El número de personas debe ser mayor a 0.");
@@ -728,6 +835,10 @@ public class PanelReservacion extends JPanel {
         return true;
     }
     
+     
+    /**
+     * Recarga la lista de reservaciones desde la base de datos.
+     */
     private void cargarReservaciones() {
         reservaciones = reservacionDAO.consultarTodos();
     }

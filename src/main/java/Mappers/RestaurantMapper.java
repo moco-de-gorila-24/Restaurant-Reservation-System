@@ -7,8 +7,18 @@ package Mappers;
 import DTO.RestaurantDTO;
 import Entidades.Restaurant;
 
+/**
+ * Clase adaptadora para convertir entre la entidad Restaurant y RestaurantDTO.
+ * 
+ * @author ACER
+ */
 public class RestaurantMapper {
 
+    /**
+     * Convierte una entidad Restaurant a RestaurantDTO.
+     * @param entity Entidad del restaurante.
+     * @return DTO con los datos.
+     */
     public static RestaurantDTO toDTO(Restaurant entity) {
         if (entity == null) {
             return null;
@@ -24,7 +34,12 @@ public class RestaurantMapper {
 
         return dto;
     }
-
+    
+    /**
+     * Convierte un RestaurantDTO a entidad.
+     * @param dto Datos del restaurante.
+     * @return Entidad lista para persistir.
+     */
     public static Restaurant toEntity(RestaurantDTO dto) {
         if (dto == null) {
             return null;
@@ -34,8 +49,11 @@ public class RestaurantMapper {
     }
 
     /**
-     * Actualiza los campos propios del restaurante.
-     * No toca la dirección ni las mesas: cada una se gestiona con su DAO.
+     * Actualiza los campos editables de un restaurante existente.
+     * No toca la dirección ni las mesas.
+     * @param restaurant Entidad a modificar.
+     * @param dto Nuevos datos.
+     * @return El restaurante modificado.
      */
     public static Restaurant actualizarEntidad(Restaurant restaurant, RestaurantDTO dto) {
         if (restaurant == null || dto == null) {

@@ -5,7 +5,9 @@
 package DTO;
 
 /**
- *
+ * Objeto de Transferencia de Datos (DTO) para la entidad DiningTable.
+ * Representa una mesa en la interfaz gráfica.
+ * 
  * @author ACER
  */
 public class DiningTableDTO {

@@ -21,11 +21,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- *
+ * Implementación del DAO para la entidad Reservation.
+ * Contiene la lógica de negocio más compleja: validación de fechas, horarios,
+ * y aplicación de reglas de puntos y niveles para clientes Premium.
+ * 
  * @author ACER
  */
 public class ReservationDAO implements IReservationDAO {
     
+    /**
+     * Guarda una nueva reservación, aplicando las reglas de capacidad y puntos Premium.
+     * @param reservacion DTO con los datos de la reservación.
+     * @return Mensaje de éxito o error.
+     */
     @Override
     public String guardar(ReservationDTO reservacion) {
         if (!datosValidos(reservacion)) {
@@ -337,30 +345,38 @@ public class ReservationDAO implements IReservationDAO {
                 && reservacion.getTableId() != null
                 && reservacion.getTableId() > 0;
     }
+    
+    /**
+     * Verifica si una mesa ya está ocupada en un rango de fecha y hora.
+     * Utiliza la logica para los intervalos de las horas de las reservaciones
+     * 
+     * @param em EntityManager para realizar la consulta JPQL.
+     * @param reservacion DTO con la nueva reservación.
+     * @param idExcluir ID de la reservación a excluir .
+     * @return true si los horarios chocan false si está disponible.
+     */
+    private boolean mesaOcupada(EntityManager em, ReservationDTO reservacion, Long idExcluir) {
+        LocalTime nuevaHoraInicio = reservacion.getHour();
+        LocalTime nuevaHoraFin = reservacion.getHour().plusHours(4);
 
-        private boolean mesaOcupada(EntityManager em, ReservationDTO reservacion, Long idExcluir) {
-            LocalTime nuevaHoraInicio = reservacion.getHour();
-            LocalTime nuevaHoraFin = reservacion.getHour().plusHours(4);
+        String jpql = "SELECT COUNT(r) FROM Reservation r " + "WHERE r.diningTable.idTable = :mesaId " + "AND r.date = :fecha " +
+                      "AND :nuevaHoraInicio < r.endTime " + "AND :nuevaHoraFin > r.hour";
 
-            // La consulta JPQL con la lógica de intersección de rangos
-            String jpql = "SELECT COUNT(r) FROM Reservation r " + "WHERE r.diningTable.idTable = :mesaId " + "AND r.date = :fecha " +
-                          "AND :nuevaHoraInicio < r.endTime " + "AND :nuevaHoraFin > r.hour";
-
-            if (idExcluir != null) {
-                jpql += " AND r.idReservation <> :idExcluir";
-            }
-
-            javax.persistence.TypedQuery<Long> query = em.createQuery(jpql, Long.class)
-                    .setParameter("mesaId", reservacion.getTableId())
-                    .setParameter("fecha", reservacion.getDate())
-                    .setParameter("nuevaHoraInicio", nuevaHoraInicio)
-                    .setParameter("nuevaHoraFin", nuevaHoraFin);
-
-            if (idExcluir != null) {
-                query.setParameter("idExcluir", idExcluir);
-            }
-
-            return query.getSingleResult() > 0;
+        if (idExcluir != null) {
+            jpql += " AND r.idReservation <> :idExcluir";
         }
+
+        javax.persistence.TypedQuery<Long> query = em.createQuery(jpql, Long.class)
+            .setParameter("mesaId", reservacion.getTableId())
+            .setParameter("fecha", reservacion.getDate())
+            .setParameter("nuevaHoraInicio", nuevaHoraInicio)
+            .setParameter("nuevaHoraFin", nuevaHoraFin);
+
+        if (idExcluir != null) {
+            query.setParameter("idExcluir", idExcluir);
+        }
+
+        return query.getSingleResult() > 0;
+    }
   
 }

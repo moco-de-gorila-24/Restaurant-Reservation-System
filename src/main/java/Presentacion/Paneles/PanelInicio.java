@@ -11,12 +11,10 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
+ * Panel principal que actúa como menú de navegación.
+ * Muestra una imagen de fondo personalizada y botones para acceder a los módulos.
  * 
  * @author Andres
- */
-
-/**
- * Menu principal del sistema que navega a los modulos del restaurante, cliente y reservaciones
  */
 public class PanelInicio extends JPanel {
 

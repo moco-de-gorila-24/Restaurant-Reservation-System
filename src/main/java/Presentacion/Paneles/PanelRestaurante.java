@@ -23,12 +23,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
+ * Panel de interfaz gráfica para la gestión (CRUD) de restaurantes.
+ * Incluye la creación de su dirección (1:1) y sus mesas asociadas (1:N).
  * 
  * @author Andres
- */
-
-/**
- * Panel con funcionalidades CRUD de restaurante
  */
 public class PanelRestaurante extends JPanel {
 
@@ -562,7 +560,6 @@ public class PanelRestaurante extends JPanel {
         return m;
     }
 
-    //limpiar
     private void limpiar() {
         idActual = null;
         txtNombre.setText(""); txtTelefono.setText(""); txtTipoCocina.setText("");

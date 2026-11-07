@@ -9,7 +9,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 /**
- *
+ * Clase encargada de gestionar la conexión y el ciclo de vida 
+ * del EntityManagerFactory de JPA.
+ * 
  * @author ACER
  */
 public class JPAUtil {

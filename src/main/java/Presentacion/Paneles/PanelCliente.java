@@ -18,12 +18,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
+ * Panel de interfaz gráfica para la gestión (CRUD) de clientes.
+ * Se conecta con el CustomerDAO para persistir y recuperar datos de la base de datos.
  * 
  * @author Andres
- */
-
-/**
- * Panel con funcionalidades CRUD de cliente
  */
 public class PanelCliente extends JPanel {
 
@@ -63,7 +61,10 @@ public class PanelCliente extends JPanel {
         construirUI();
         cargarClientes();
     }
-
+    
+    /**
+     * Construye e inicializa los componentes visuales del panel.
+     */
     private void construirUI() {
         add(construirHeader(), BorderLayout.NORTH);
         add(construirFormulario(), BorderLayout.CENTER);
@@ -80,6 +81,10 @@ public class PanelCliente extends JPanel {
         add(sur, BorderLayout.SOUTH);
     }
 
+    /**
+     * Construye la cabecera del panel con el botón de volver y el título.
+     * @return Panel configurado.
+     */
     private JPanel construirHeader() {
         JPanel norte = new JPanel(new BorderLayout());
         norte.setOpaque(false);
@@ -101,7 +106,11 @@ public class PanelCliente extends JPanel {
         norte.add(placeholder, BorderLayout.EAST);
         return norte;
     }
-
+    
+    /**
+     * Construye el formulario con los campos de texto para ingresar los datos del cliente.
+     * @return Panel del formulario.
+     */
     private JPanel construirFormulario() {
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setOpaque(false);
@@ -211,7 +220,11 @@ public class PanelCliente extends JPanel {
         contenedor.add(panelGuardar, BorderLayout.SOUTH);
         return contenedor;
     }
-
+    
+    /**
+     * Construye la barra inferior de botones de acción (Actualizar, Eliminar, Buscar).
+     * @return Panel de botones.
+     */
     private JPanel construirBarraBotones() {
         JPanel barra = new JPanel(new BorderLayout());
         barra.setOpaque(false);
@@ -245,7 +258,11 @@ public class PanelCliente extends JPanel {
 
         return barra;
     }
-
+    
+    /**
+     * Helper para crear botones con un estilo homogéneo.
+     * @return El JButton configurado.
+     */
     private JButton boton(String texto, Color color, int w, int h) {
         JButton b = new JButton(texto);
         b.setBackground(color);
@@ -256,17 +273,29 @@ public class PanelCliente extends JPanel {
         b.setPreferredSize(new Dimension(w, h));
         return b;
     }
-
+    
+    /**
+     * Muestra un mensaje de error en la barra de estado.
+     * @param msg Mensaje a mostrar.
+     */
     private void mostrarError(String msg) {
         lblStatus.setForeground(new Color(190, 40, 40));
         lblStatus.setText("⚠ " + msg);
     }
-
+    
+    /**
+     * Muestra un mensaje de éxito en la barra de estado.
+     * @param msg Mensaje a mostrar.
+     */
     private void mostrarExito(String msg) {
         lblStatus.setForeground(new Color(40, 140, 40));
         lblStatus.setText("✔ " + msg);
     }
 
+    /**
+     * Agrega un teléfono validado a la lista visual del cliente.
+     * @return true si se agregó correctamente.
+     */
     private boolean agregarTelefono() {
         String tel = txtTelefono.getText().trim();
         if (!TELEFONO_PATTERN.matcher(tel).matches()) {
@@ -278,6 +307,11 @@ public class PanelCliente extends JPanel {
         mostrarExito("Teléfono agregado.");
         return true;
     }
+    
+    /**
+     * Quita un teléfono seleccionado de la lista visual.
+     * @return true si se quitó.
+     */
 
     private boolean quitarTelefono() {
         int idx = listaTelefonos.getSelectedIndex();
@@ -288,17 +322,29 @@ public class PanelCliente extends JPanel {
         modeloTelefonos.remove(idx);
         return true;
     }
-
+    
+    /**
+     * Extrae los teléfonos de la lista visual a una lista estándar.
+     * @return Lista de Strings.
+     */
     private List<String> extraerTelefonos() {
         List<String> tel = new ArrayList<>();
         for (int i = 0; i < modeloTelefonos.size(); i++) tel.add(modeloTelefonos.get(i));
         return tel;
     }
-
+    
+    /**
+     * Delega la acción de guardar (crear o actualizar según el estado).
+     * @return true si la operación fue exitosa.
+     */
     private boolean guardar() {
         return idActual == null ? crear() : actualizar();
     }
-
+    
+    /**
+     * Crea un nuevo cliente a partir de los datos del formulario.
+     * @return true si se guardó correctamente.
+     */
     private boolean crear() {
         String nombre = txtNombre.getText().trim();
         String email = txtEmail.getText().trim();
@@ -357,7 +403,11 @@ public class PanelCliente extends JPanel {
         mostrarExito(resultado);
         return true;
     }
-
+    
+     /**
+     * Actualiza un cliente existente.
+     * @return true si se actualizó correctamente.
+     */
     private boolean actualizar() {
         if (idActual == null) {
             mostrarError("Primero selecciona un cliente para actualizar.");
@@ -416,7 +466,11 @@ public class PanelCliente extends JPanel {
         mostrarExito(resultado);
         return true;
     }
-
+    
+    /**
+     * Acción del botón Actualizar: carga un cliente seleccionado en el formulario.
+     * @return true si se seleccionó y cargó correctamente.
+     */
     private boolean accionActualizar() {
         FilaCliente sel = mostrarDialogoSeleccion("Seleccionar cliente a actualizar", "Editar");
         if (sel == null) return false;
@@ -434,7 +488,11 @@ public class PanelCliente extends JPanel {
         mostrarExito("Editando cliente #" + sel.id + ". Modifica y presiona Guardar.");
         return true;
     }
-
+    
+    /**
+     * Acción del botón Eliminar: elimina un cliente seleccionado previa confirmación.
+     * @return true si se eliminó correctamente.
+     */
     private boolean accionEliminar() {
         FilaCliente sel = mostrarDialogoSeleccion("Seleccionar cliente a eliminar", "Eliminar");
         if (sel == null) return false;
@@ -459,7 +517,11 @@ public class PanelCliente extends JPanel {
         mostrarExito(resultado);
         return true;
     }
-
+    
+    /**
+     * Acción del botón Buscar: abre el diálogo de búsqueda.
+     * @return true si hay registros y se abre el diálogo.
+     */
     private boolean accionBuscar() {
         cargarClientes();
         
@@ -471,7 +533,11 @@ public class PanelCliente extends JPanel {
         mostrarDialogoBusqueda();
         return true;
     }
-
+    
+    /**
+     * Muestra un diálogo modal con una tabla para seleccionar un cliente.
+     * @return El FilaCliente seleccionado o null.
+     */
     private FilaCliente mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
         if (filas.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No hay registros disponibles.",
@@ -517,7 +583,10 @@ public class PanelCliente extends JPanel {
         dlg.setVisible(true);
         return seleccion[0];
     }
-
+    
+     /**
+     * Muestra un diálogo modal con la tabla de todos los clientes registrados.
+     */
     private void mostrarDialogoBusqueda() {
         DefaultTableModel modelo = crearModeloTabla();
         JTable tabla = new JTable(modelo);
@@ -539,7 +608,11 @@ public class PanelCliente extends JPanel {
 
         dlg.setVisible(true);
     }
-
+    
+    /**
+     * Genera el modelo de la tabla para mostrar los clientes.
+     * @return DefaultTableModel con los datos.
+     */
     private DefaultTableModel crearModeloTabla() {
         String[] cols = {"ID", "Nombre", "Email", "Teléfonos", "Premium", "Puntos", "Nivel"};
         DefaultTableModel m = new DefaultTableModel(cols, 0) {
@@ -556,7 +629,10 @@ public class PanelCliente extends JPanel {
         }
         return m;
     }
-
+    
+    /**
+     * Limpia todos los campos del formulario y reinicia el estado.
+     */
     private void limpiar() {
         idActual = null;
         txtNombre.setText(""); txtEmail.setText(""); txtTelefono.setText("");
@@ -566,12 +642,19 @@ public class PanelCliente extends JPanel {
         txtPoints.setText(""); txtLevel.setText("");
         lblStatus.setText(" ");
     }
-
+    
+    /**
+     * Busca una fila en la lista local por su ID.
+     * @return FilaCliente o null.
+     */
     private FilaCliente buscarPorId(Long id) {
         for (FilaCliente c : filas) if (c.id.equals(id)) return c;
         return null;
     }
     
+    /**
+     * Carga los clientes desde la base de datos y actualiza la lista en memoria.
+     */
     private void cargarClientes() {
         try {
             List<CustomerDTO> clientes = clienteDAO.consultarTodos();
@@ -602,6 +685,11 @@ public class PanelCliente extends JPanel {
         }
     }
     
+    /**
+     * Evalúa si el mensaje retornado por el DAO contiene un error.
+     * @param mensaje Texto a evaluar.
+     * @return true si es un mensaje de error.
+     */
     private boolean esError(String mensaje) {
         if (mensaje == null) {
             return true;

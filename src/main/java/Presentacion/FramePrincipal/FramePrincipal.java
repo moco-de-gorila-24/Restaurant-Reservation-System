@@ -5,9 +5,14 @@
 package Presentacion.FramePrincipal;
 
 import Presentacion.Coordinador.Coordinador;
-
 import javax.swing.*;
 
+/**
+ * Ventana principal de la aplicación.
+ * Configura el tamaño, título y propiedades básicas de la ventana.
+ * 
+ * @author luis
+ */
 public class FramePrincipal extends JFrame {
     private final Coordinador coordinador;
 

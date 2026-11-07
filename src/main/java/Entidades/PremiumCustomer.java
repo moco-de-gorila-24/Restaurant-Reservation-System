@@ -14,7 +14,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- *
+ * Entidad JPA que representa a un Cliente Premium.
+ * Hereda de la clase Customer y añade campos específicos como puntos y nivel.
+ * 
  * @author ACER
  */
 @Entity

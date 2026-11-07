@@ -9,11 +9,18 @@ import Entidades.Customer;
 import Entidades.PremiumCustomer;
 
 /**
- *
+ * Clase adaptadora para convertir entre las entidades de Cliente y CustomerDTO.
+ * Maneja la lógica de instanciar un PremiumCustomer si el DTO lo indica.
+ * 
  * @author ACER
  */
 public class CustomerMapper {
 
+    /**
+     * Convierte una entidad Customer o PremiumCustomer a CustomerDTO.
+     * @param entity Entidad del cliente.
+     * @return DTO con los datos correspondientes.
+     */
     public static CustomerDTO toDTO(Customer entity) {
         if (entity == null) {
             return null;
@@ -32,6 +39,11 @@ public class CustomerMapper {
         return new CustomerDTO(entity.getId(), entity.getName(), entity.getEmail(), entity.getTelephone(), premium, points, level);
     }
 
+    /**
+     * Convierte un CustomerDTO a su entidad que corresponde Customer o PremiumCustomer.
+     * @param dto DTO con los datos del cliente.
+     * @return Entidad lista para persistir.
+     */
     public static Customer toEntity(CustomerDTO dto) {
         if (dto == null) {
             return null;

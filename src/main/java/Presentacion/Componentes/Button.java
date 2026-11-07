@@ -9,7 +9,9 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- *
+ * Componente gráfico personalizado que extiende de JButton.
+ * Dibuja un botón con esquinas redondeadas, gradiente de color y efecto hover/presionado.
+ * 
  * @author ACER
  */
 public class Button extends JButton {
@@ -66,6 +68,6 @@ public class Button extends JButton {
         g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, w - 1, h - 1, radio, radio));
 
         g2.dispose();
-        super.paintComponent(g);   // dibuja el texto encima
+        super.paintComponent(g);   
     }
 }
