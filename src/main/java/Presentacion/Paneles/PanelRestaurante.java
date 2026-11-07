@@ -1,7 +1,14 @@
 package Presentacion.Paneles;
 
+import DAO.AddressDAO;
+import DAO.DiningTableDAO;
+import DAO.RestaurantDAO;
+import DTO.AddressDTO;
+import DTO.DiningTableDTO;
+import DTO.RestaurantDTO;
 import Entidades.Address;
 import Entidades.DiningTable;
+import Mappers.DiningTableMapper;
 import Presentacion.Componentes.Button;
 import Presentacion.Coordinador.Coordinador;
 
@@ -26,7 +33,7 @@ public class PanelRestaurante extends JPanel {
     private JTextField txtCapMesa;
 
     //Mesas del restaurante
-    private final List<DiningTable> mesasEnEdicion = new ArrayList<>();
+    private final List<DiningTableDTO> mesasEnEdicion = new ArrayList<>();
     private DefaultListModel<String> modeloListaMesas;
     private JList<String> listaMesas;
 
@@ -40,8 +47,8 @@ public class PanelRestaurante extends JPanel {
     private static class FilaRestaurante {
         Long id;
         String nombre, telefono, tipoCocina;
-        Address address;
-        List<DiningTable> mesas = new ArrayList<>();
+        AddressDTO address;
+        List<DiningTableDTO> mesas = new ArrayList<>();
     }
 
     private final List<FilaRestaurante> filas = new ArrayList<>();
@@ -253,16 +260,15 @@ public class PanelRestaurante extends JPanel {
         lblStatus.setText("✔ " + msg);
     }
 
-    private String formatoMesa(DiningTable m) {
+    private String formatoMesa(DiningTableDTO m) {
         return "Mesa " + m.getNumber() + " (cap " + m.getCapacity() + ")";
     }
 
-    //mesas
     private boolean agregarMesa() {
         try {
             int cap = Integer.parseInt(txtCapMesa.getText().trim());
             if (cap <= 0) { mostrarError("La capacidad debe ser mayor a 0."); return false; }
-            DiningTable mesa = new DiningTable(mesasEnEdicion.size() + 1, cap);
+            DiningTableDTO mesa = new DiningTableDTO(mesasEnEdicion.size() + 1, cap);
             mesasEnEdicion.add(mesa);
             renumerarMesas();
             txtCapMesa.setText("");
@@ -287,132 +293,115 @@ public class PanelRestaurante extends JPanel {
             mesasEnEdicion.get(i).setNumber(i + 1);
         }
         modeloListaMesas.clear();
-        for (DiningTable m : mesasEnEdicion) {
+        for (DiningTableDTO m : mesasEnEdicion) {
             modeloListaMesas.addElement(formatoMesa(m));
         }
     }
 
-    private void cargarMesasEnLista(List<DiningTable> mesas) {
+    private void cargarMesasEnLista(List<DiningTableDTO> mesas) {
         mesasEnEdicion.clear();
         modeloListaMesas.clear();
-        for (DiningTable m : mesas) {
+        for (DiningTableDTO m : mesas) {
             mesasEnEdicion.add(m);
             modeloListaMesas.addElement(formatoMesa(m));
         }
     }
 
-    //CRUD
     private boolean guardar() {
-        return idActual == null ? crear() : actualizar();
+        return idActual == null ? crear() : accionActualizar();
     }
     private boolean crear() {
-        if(txtNombre.getText().trim().isEmpty()){
+        if (txtNombre.getText().trim().isEmpty()) {
             mostrarError("El nombre no puede estar vacío.");
             return false;
         }
-        if(txtTipoCocina.getText().trim().isEmpty()) {
+        if (txtTipoCocina.getText().trim().isEmpty()) {
             mostrarError("El tipo de cocina no puede estar vacío.");
             return false;
         }
-        if(txtCalle.getText().trim().isEmpty()){
+        if (txtCalle.getText().trim().isEmpty()) {
             mostrarError("La calle no puede estar vacía.");
             return false;
         }
-        if(txtCP.getText().trim().isEmpty()){
-            mostrarError("El CP no puede estar vacío.");
+        if (txtEstado.getText().trim().isEmpty()) {
+            mostrarError("El estado no puede estar vacío.");
             return false;
         }
-
-        String tel = txtTelefono.getText().trim();
-        if(!tel.isEmpty() && !TELEFONO_PATTERN.matcher(tel).matches()) {
-            mostrarError("El telefono debe tener 10 dígitos sin guiones (ej. 6444010101).");
-            return false;
-        }
-        int cp, numDir;
-        try {
-            cp = Integer.parseInt(txtCP.getText().trim()); }
-        catch (
-                NumberFormatException ex) {
-                mostrarError("El CP debe ser numérico.");
-                return false;
-        }
-        try {
-            numDir = Integer.parseInt(txtNumero.getText().trim());
-        }
-        catch (NumberFormatException ex) {
-            mostrarError("El número de dirección debe ser numérico.");
-            return false;
-        }
-
-        Address dir = new Address(txtCalle.getText().trim(), txtEstado.getText().trim(), cp, txtCiudad.getText().trim(), numDir);
-
-        FilaRestaurante fila = new FilaRestaurante();
-        fila.id = (long) (filas.size() + 1);
-        fila.nombre = txtNombre.getText().trim();
-        fila.telefono = tel;
-        fila.tipoCocina = txtTipoCocina.getText().trim();
-        fila.address = dir;
-        fila.mesas = new ArrayList<>(mesasEnEdicion);
-        filas.add(fila);
-        limpiar();
-        mostrarExito("Restaurante creado con ID " + fila.id + ".");
-        return true;
-    }
-
-    private boolean actualizar() {
-        FilaRestaurante fila = buscarPorId(idActual);
-        if(fila == null) {
-            mostrarError("No se encontró el restaurante a actualizar.");
-            return false;
-        }
-
-        if(txtNombre.getText().trim().isEmpty()){
-            mostrarError("El nombre no puede estar vacío.");
-            return false;
-        }
-
-        if(txtTipoCocina.getText().trim().isEmpty()){
-            mostrarError("El tipo de cocina no puede estar vacío.");
-            return false;
-        }
-
-        if(txtCalle.getText().trim().isEmpty()){
-            mostrarError("La calle no puede estar vacía.");
+        if (txtCiudad.getText().trim().isEmpty()) {
+            mostrarError("La ciudad no puede estar vacía.");
             return false;
         }
 
         String tel = txtTelefono.getText().trim();
         if (!tel.isEmpty() && !TELEFONO_PATTERN.matcher(tel).matches()) {
-            mostrarError("El teléfono debe tener 10 dígitos sin guiones.");
+            mostrarError("El teléfono debe tener 10 dígitos sin guiones (ej. 6444010101).");
             return false;
         }
+
         int cp, numDir;
         try {
             cp = Integer.parseInt(txtCP.getText().trim());
-        }
-        catch (NumberFormatException ex) {
+        } catch (NumberFormatException ex) {
             mostrarError("El CP debe ser numérico.");
             return false;
         }
         try {
             numDir = Integer.parseInt(txtNumero.getText().trim());
-        }
-        catch (NumberFormatException ex) {
+        } catch (NumberFormatException ex) {
             mostrarError("El número de dirección debe ser numérico.");
             return false;
         }
 
-        fila.nombre = txtNombre.getText().trim();
+        AddressDAO addressDAO = new AddressDAO();
+        RestaurantDAO restaurantDAO = new RestaurantDAO();
+        DiningTableDAO diningDAO = new DiningTableDAO();
+
+        AddressDTO address = new AddressDTO(
+                txtCalle.getText().trim(), txtEstado.getText().trim(), cp,
+                txtCiudad.getText().trim(), numDir);
+
+        Long addressId = addressDAO.agregar(address);
+        if (addressId == null) {
+            mostrarError("No se pudo guardar la dirección.");
+            return false;
+        }
+
+        String nombre = txtNombre.getText().trim();
+        String cocina = txtTipoCocina.getText().trim();
+
+        RestaurantDTO restaurantDTO = new RestaurantDTO(nombre, tel, cocina, addressId);
+        Long restaurantId = restaurantDAO.guardar(restaurantDTO);
+        if (restaurantId == null) {
+            mostrarError("No se pudo guardar el restaurante.");
+            return false;
+        }
+
+
+        List<DiningTableDTO> mesas = new ArrayList<>(mesasEnEdicion);
+        for (DiningTableDTO m : mesas) {
+            m.setRestaurantId(restaurantId);
+        }
+
+        if (!mesas.isEmpty()) {
+            String resultado = diningDAO.guardar(mesas);
+            if (!resultado.startsWith("Se guardaron")) {
+                mostrarError("Restaurante guardado, pero las mesas no: " + resultado);
+                return false;
+            }
+        }
+
+        // Lista en memoria (la usan Buscar, Actualizar y Eliminar)
+        FilaRestaurante fila = new FilaRestaurante();
+        fila.id = restaurantId;
+        fila.nombre = nombre;
         fila.telefono = tel;
-        fila.tipoCocina = txtTipoCocina.getText().trim();
-        fila.address.setStreet(txtCalle.getText().trim());
-        fila.address.setState(txtEstado.getText().trim());
-        fila.address.setPostCode(cp);
-        fila.address.setCity(txtCiudad.getText().trim());
-        fila.address.setNumber(numDir);
-        fila.mesas = new ArrayList<>(mesasEnEdicion);
+        fila.tipoCocina = cocina;
+        fila.address = address;
+        fila.mesas = mesas;
+        filas.add(fila);
+
         limpiar();
-        mostrarExito("Restaurante actualizado.");
+        mostrarExito("Restaurante creado con ID " + restaurantId + ".");
         return true;
     }
 
