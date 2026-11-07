@@ -8,11 +8,13 @@ import Configuracion.JPAUtil;
 import DTO.ReservationDTO;
 import Entidades.Customer;
 import Entidades.DiningTable;
+import Entidades.PremiumCustomer;
 import Entidades.Reservation;
 import Interfaces.IReservationDAO;
 import Mappers.ReservationMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
@@ -21,8 +23,8 @@ import javax.persistence.EntityTransaction;
  * @author ACER
  */
 public class ReservationDAO implements IReservationDAO {
-
-    @Override
+    
+@Override
     public String guardar(ReservationDTO reservacion) {
         if (!datosValidos(reservacion)) {
             return "Error: verifica la fecha, hora, cliente, mesa y número de personas.";
@@ -33,30 +35,67 @@ public class ReservationDAO implements IReservationDAO {
 
         try {
             Customer customer = em.find(Customer.class, reservacion.getCustomerId());
-
             if (customer == null) {
                 return "El cliente seleccionado no existe.";
             }
 
             DiningTable table = em.find(DiningTable.class, reservacion.getTableId());
-
             if (table == null) {
                 return "La mesa seleccionada no existe.";
             }
 
-            if (reservacion.getNumberPeople() > table.getCapacity()) {
+            int personas = reservacion.getNumberPeople();
+            int capacidad = table.getCapacity();
+
+            if (personas > capacidad) {
                 return "El número de personas supera la capacidad de la mesa.";
+            }
+
+            int espaciosSobrantes = capacidad - personas;
+            int limiteSobrante = 2; 
+
+            //si el cliente es nivel premium 4 o 5, permite hasta 5 de diferencia
+            if (customer instanceof PremiumCustomer) {
+                PremiumCustomer premium = (PremiumCustomer) customer;
+                if (premium.getLevel() >= 4) {
+                    limiteSobrante = 5;
+                }
+            }
+
+            if (espaciosSobrantes > limiteSobrante) {
+                return "La mesa no se puede reservar debido a la poca cantidad de personas. " +
+                       "Límite de diferencia permitido: " + limiteSobrante;
             }
 
             if (mesaOcupada(em, reservacion, null)) {
                 return "Error: la mesa ya tiene una reservación en esa fecha y hora.";
             }
 
+            if (customer instanceof PremiumCustomer) {
+                PremiumCustomer premium = (PremiumCustomer) customer;
+                Random random = new Random();
+
+                premium.setPoints(premium.getPoints() + 5);
+
+                if (premium.getLevel() < 5 && random.nextInt(100) < 25) {
+                    premium.setLevel(premium.getLevel() + 1);
+                }
+
+                //perdida de puntos
+                if (espaciosSobrantes > 0) {
+                    premium.setPoints(Math.max(0, premium.getPoints() - 5));
+
+                    if (premium.getLevel() > 1 && random.nextInt(100) < 25) {
+                        premium.setLevel(premium.getLevel() - 1);
+                    }
+                }
+            }
+
             Reservation entidad = ReservationMapper.toEntity(reservacion, customer, table);
 
             tx.begin();
             em.persist(entidad);
-            tx.commit();
+            tx.commit(); 
 
             return "Reservación guardada correctamente ID: " + entidad.getId();
 
@@ -64,9 +103,7 @@ public class ReservationDAO implements IReservationDAO {
             if (tx.isActive()) {
                 tx.rollback();
             }
-
             return "Error al guardar la reservación: " + e.getMessage();
-
         } finally {
             em.close();
         }
@@ -95,7 +132,6 @@ public class ReservationDAO implements IReservationDAO {
             }
 
             DiningTable table = em.find(DiningTable.class, reservacion.getTableId());
-
             if (table == null) {
                 return "La mesa seleccionada no existe.";
             }
@@ -265,4 +301,5 @@ public class ReservationDAO implements IReservationDAO {
 
         return query.getSingleResult() > 0;
     }
+  
 }

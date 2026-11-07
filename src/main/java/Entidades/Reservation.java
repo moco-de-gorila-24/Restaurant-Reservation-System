@@ -32,7 +32,7 @@ public class Reservation implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "table_id", nullable = false)
     private DiningTable diningTable;
-
+    
 
     public Reservation() {
     }
@@ -89,4 +89,5 @@ public class Reservation implements Serializable {
     public void setDiningTable(DiningTable diningTable) {
         this.diningTable = diningTable;
     }
+    
 }
