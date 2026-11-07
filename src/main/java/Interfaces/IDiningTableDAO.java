@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface IDiningTableDAO {
 
-    String guardar(DiningTableDTO mesa);
+    String guardar(List<DiningTableDTO> mesa);
     String actualizar(Long id, DiningTableDTO mesa);
     String eliminar(Long id);
     DiningTableDTO consultarPorId(Long id);

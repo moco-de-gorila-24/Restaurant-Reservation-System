@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface IRestaurantDAO {
 
-    String guardar(RestaurantDTO restaurante);
+    Long guardar(RestaurantDTO restaurante);
 
     String actualizar(Long id, RestaurantDTO restaurante);
 
