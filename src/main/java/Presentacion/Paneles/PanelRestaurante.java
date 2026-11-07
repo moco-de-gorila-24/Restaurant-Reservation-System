@@ -17,7 +17,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -434,25 +436,21 @@ public class PanelRestaurante extends JPanel {
 
     private boolean accionEliminar() {
         FilaRestaurante sel = mostrarDialogoSeleccion("Seleccionar restaurante a eliminar", "Eliminar");
-        if (sel == null) return false;
+
 
         int r = JOptionPane.showConfirmDialog(this,
                 "¿Eliminar restaurante #" + sel.id + " (" + sel.nombre + ")?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (r != JOptionPane.YES_OPTION) return false;
 
-        filas.remove(sel);
+        //filas.remove(sel);
         if (idActual != null && idActual.equals(sel.id)) limpiar();
         mostrarExito("Restaurante eliminado.");
         return true;
     }
 
     private boolean accionBuscar() {
-        if (filas.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay registros disponibles.",
-                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
-            return false;
-        }
+        crearModeloTabla();
         mostrarDialogoBusqueda();
         return true;
     }
@@ -531,14 +529,34 @@ public class PanelRestaurante extends JPanel {
         DefaultTableModel m = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        for (FilaRestaurante f : filas) {
+
+        RestaurantDAO restaurantDAO = new RestaurantDAO();
+        AddressDAO addressDAO = new AddressDAO();
+        DiningTableDAO diningTableDAO = new DiningTableDAO();
+
+        Map<Long, AddressDTO> direcciones = new HashMap<>();
+        for (AddressDTO a : addressDAO.consultarTodos()) {
+            direcciones.put(a.getId(), a);
+        }
+
+        Map<Long, DiningTableDTO> mesas = new HashMap<>();
+        for (DiningTableDTO d : diningTableDAO.consultarTodos()) {
+            mesas.put(d.getRestaurantId(), d);
+        }
+
+        for (RestaurantDTO r : restaurantDAO.consultarTodos()) {
+            AddressDTO a = direcciones.get(r.getAddressId());
+            DiningTableDTO d = mesas.get(r.getId());
+
             m.addRow(new Object[]{
-                    f.id, f.nombre,
-                    f.telefono == null ? "" : f.telefono,
-                    f.tipoCocina,
-                    f.address == null ? "" : f.address.getStreet(),
-                    f.address == null ? "" : f.address.getCity(),
-                    f.mesas.size() + " mesa(s)"
+                    r.getId(),
+                    r.getName(),
+                    r.getTelephone() == null ? "" : r.getTelephone(),
+                    r.getKitchenType(),
+                    a == null ? "" : a.getStreet(),
+                    a == null ? "" : a.getCity(),
+                    d == null ? "" : d.getNumber()
+
             });
         }
         return m;
