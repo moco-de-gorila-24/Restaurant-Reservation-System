@@ -46,18 +46,13 @@ public class PanelRestaurante extends JPanel {
     //Botones
     private JButton btnGuardar, btnActualizar, btnEliminar, btnBuscar, btnAgregarMesa, btnQuitarMesa;
     private Button btnLimpiar;
+    
+    private final RestaurantDAO restaurantDAO = new RestaurantDAO();
+    private final AddressDAO addressDAO = new AddressDAO();
+    private final DiningTableDAO diningTableDAO = new DiningTableDAO();
 
     private JLabel lblStatus;
     private Long idActual = null;
-
-    private static class FilaRestaurante {
-        Long id;
-        String nombre, telefono, tipoCocina;
-        AddressDTO address;
-        List<DiningTableDTO> mesas = new ArrayList<>();
-    }
-
-    private final List<FilaRestaurante> filas = new ArrayList<>();
 
     public PanelRestaurante(Coordinador coordinador) {
         this.coordinador = coordinador;
@@ -258,12 +253,12 @@ public class PanelRestaurante extends JPanel {
 
     private void mostrarError(String msg) {
         lblStatus.setForeground(new Color(190, 40, 40));
-        lblStatus.setText("⚠ " + msg);
+        lblStatus.setText(msg);
     }
 
     private void mostrarExito(String msg) {
         lblStatus.setForeground(new Color(40, 140, 40));
-        lblStatus.setText("✔ " + msg);
+        lblStatus.setText(msg);
     }
 
     private String formatoMesa(DiningTableDTO m) {
@@ -314,265 +309,450 @@ public class PanelRestaurante extends JPanel {
     }
 
     private boolean guardar() {
-        return idActual == null ? crear() : accionActualizar();
+        return idActual == null ? crear() : actualizar();
     }
+    
     private boolean crear() {
-        if (txtNombre.getText().trim().isEmpty()) {
-            mostrarError("El nombre no puede estar vacío.");
-            return false;
-        }
-        if (txtTipoCocina.getText().trim().isEmpty()) {
-            mostrarError("El tipo de cocina no puede estar vacío.");
-            return false;
-        }
-        if (txtCalle.getText().trim().isEmpty()) {
-            mostrarError("La calle no puede estar vacía.");
-            return false;
-        }
-        if (txtEstado.getText().trim().isEmpty()) {
-            mostrarError("El estado no puede estar vacío.");
-            return false;
-        }
-        if (txtCiudad.getText().trim().isEmpty()) {
-            mostrarError("La ciudad no puede estar vacía.");
+        if (!validarFormulario()) {
             return false;
         }
 
-        String tel = txtTelefono.getText().trim();
-        if (!tel.isEmpty() && !TELEFONO_PATTERN.matcher(tel).matches()) {
-            mostrarError("El teléfono debe tener 10 dígitos sin guiones (ej. 6444010101).");
-            return false;
-        }
-
-        int cp, numDir;
-        try {
-            cp = Integer.parseInt(txtCP.getText().trim());
-        } catch (NumberFormatException ex) {
-            mostrarError("El CP debe ser numérico.");
-            return false;
-        }
-        try {
-            numDir = Integer.parseInt(txtNumero.getText().trim());
-        } catch (NumberFormatException ex) {
-            mostrarError("El número de dirección debe ser numérico.");
-            return false;
-        }
-
-        AddressDAO addressDAO = new AddressDAO();
-        RestaurantDAO restaurantDAO = new RestaurantDAO();
-        DiningTableDAO diningDAO = new DiningTableDAO();
-
-        AddressDTO address = new AddressDTO(
-                txtCalle.getText().trim(), txtEstado.getText().trim(), cp,
-                txtCiudad.getText().trim(), numDir);
+        AddressDTO address = obtenerDireccionFormulario();
 
         Long addressId = addressDAO.agregar(address);
+
         if (addressId == null) {
             mostrarError("No se pudo guardar la dirección.");
             return false;
         }
 
-        String nombre = txtNombre.getText().trim();
-        String cocina = txtTipoCocina.getText().trim();
+        RestaurantDTO restaurante = new RestaurantDTO(txtNombre.getText().trim(), txtTelefono.getText().trim(), txtTipoCocina.getText().trim(), addressId);
 
-        RestaurantDTO restaurantDTO = new RestaurantDTO(nombre, tel, cocina, addressId);
-        Long restaurantId = restaurantDAO.guardar(restaurantDTO);
+        Long restaurantId = restaurantDAO.guardar(restaurante);
+
         if (restaurantId == null) {
             mostrarError("No se pudo guardar el restaurante.");
             return false;
         }
 
+        List<DiningTableDTO> mesasNuevas = new ArrayList<>();
 
-        List<DiningTableDTO> mesas = new ArrayList<>(mesasEnEdicion);
-        for (DiningTableDTO m : mesas) {
-            m.setRestaurantId(restaurantId);
+        for (int i = 0; i < mesasEnEdicion.size(); i++) {
+            DiningTableDTO mesa = new DiningTableDTO(i + 1, mesasEnEdicion.get(i).getCapacity(), restaurantId);
+            mesasNuevas.add(mesa);
         }
 
-        if (!mesas.isEmpty()) {
-            String resultado = diningDAO.guardar(mesas);
+        if (!mesasNuevas.isEmpty()) {
+            String resultado = diningTableDAO.guardar(mesasNuevas);
+
             if (!resultado.startsWith("Se guardaron")) {
-                mostrarError("Restaurante guardado, pero las mesas no: " + resultado);
+                mostrarError("El restaurante se guardó, pero ocurrió un problema al guardar las mesas: " + resultado);
                 return false;
             }
         }
 
-        // Lista en memoria (la usan Buscar, Actualizar y Eliminar)
-        FilaRestaurante fila = new FilaRestaurante();
-        fila.id = restaurantId;
-        fila.nombre = nombre;
-        fila.telefono = tel;
-        fila.tipoCocina = cocina;
-        fila.address = address;
-        fila.mesas = mesas;
-        filas.add(fila);
-
         limpiar();
-        mostrarExito("Restaurante creado con ID " + restaurantId + ".");
+        mostrarExito("Restaurante registrado correctamente. ID: " + restaurantId);
         return true;
     }
-
+    
     //acciones con diálogo
 
     private boolean accionActualizar() {
-        FilaRestaurante sel = mostrarDialogoSeleccion("Seleccionar restaurante a actualizar", "Editar");
-        if (sel == null) return false;
-        idActual = sel.id;
-        txtNombre.setText(sel.nombre);
-        txtTelefono.setText(sel.telefono == null ? "" : sel.telefono);
-        txtTipoCocina.setText(sel.tipoCocina);
-        if (sel.address != null) {
-            txtCalle.setText(sel.address.getStreet() == null ? "" : sel.address.getStreet());
-            txtEstado.setText(sel.address.getState() == null ? "" : sel.address.getState());
-            txtCP.setText(String.valueOf(sel.address.getPostCode()));
-            txtCiudad.setText(sel.address.getCity() == null ? "" : sel.address.getCity());
-            txtNumero.setText(String.valueOf(sel.address.getNumber()));
+        Long id = mostrarDialogoSeleccion("Seleccionar restaurante a actualizar", "Editar");
+
+        if (id == null) {
+            return false;
         }
-        cargarMesasEnLista(sel.mesas);
-        mostrarExito("Editando restaurante #" + sel.id + ". Modifica y presiona Guardar.");
+
+        cargarRestaurante(id);
         return true;
     }
 
     private boolean accionEliminar() {
-        FilaRestaurante sel = mostrarDialogoSeleccion("Seleccionar restaurante a eliminar", "Eliminar");
+        Long id = mostrarDialogoSeleccion("Seleccionar restaurante a eliminar", "Eliminar");
 
+        if (id == null) {
+            return false;
+        }
 
-        int r = JOptionPane.showConfirmDialog(this,
-                "¿Eliminar restaurante #" + sel.id + " (" + sel.nombre + ")?",
-                "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (r != JOptionPane.YES_OPTION) return false;
+        RestaurantDTO restaurante = restaurantDAO.consultarPorId(id);
 
-        //filas.remove(sel);
-        if (idActual != null && idActual.equals(sel.id)) limpiar();
-        mostrarExito("Restaurante eliminado.");
-        return true;
+        if (restaurante == null) {
+            mostrarError("El restaurante ya no existe.");
+            return false;
+        }
+
+        int respuesta = JOptionPane.showConfirmDialog(this, "¿Deseas eliminar el restaurante " + restaurante.getName() + " (ID: " + id + ")?\nTambién se eliminarán sus mesas y dirección.", "Confirmar eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (respuesta != JOptionPane.YES_OPTION) {
+            return false;
+        }
+
+        String resultado = restaurantDAO.eliminar(id);
+
+        if (resultado.startsWith("Restaurante eliminado correctamente")) {
+            if (idActual != null && idActual.equals(id)) {
+                limpiar();
+            }
+
+            mostrarExito(resultado);
+            return true;
+        }
+
+        mostrarError(resultado);
+        return false;
     }
 
     private boolean accionBuscar() {
-        crearModeloTabla();
+        List<RestaurantDTO> restaurantes = restaurantDAO.consultarTodos();
+
+        if (restaurantes.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay restaurantes registrados.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return false;
+        }
+
         mostrarDialogoBusqueda();
         return true;
     }
 
     //diálogos modales
-    private FilaRestaurante mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
-        if (filas.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay registros disponibles.",
-                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+    private Long mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
+        DefaultTableModel modelo = crearModeloTabla();
+
+        if (modelo.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "No hay restaurantes registrados.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return null;
         }
 
-        DefaultTableModel modelo = crearModeloTabla();
         JTable tabla = new JTable(modelo);
         tabla.setRowHeight(24);
         tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabla.setRowSelectionInterval(0, 0);
 
-        final FilaRestaurante[] seleccion = {null};
+        final Long[] seleccion = {null};
 
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), titulo,
-                Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), titulo, Dialog.ModalityType.APPLICATION_MODAL);
+
         dlg.setSize(820, 420);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout(10, 10));
         dlg.getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        dlg.add(new JScrollPane(tabla), BorderLayout.CENTER);
 
+        dlg.add(new JScrollPane(tabla), BorderLayout.CENTER);
         JPanel sur = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+
         JButton ok = new JButton(textoBotonOk);
         JButton cancelar = new JButton("Cancelar");
+
         ok.addActionListener(e -> {
             int fila = tabla.getSelectedRow();
+
             if (fila < 0) {
-                JOptionPane.showMessageDialog(dlg, "Selecciona un registro.",
-                        "Aviso", JOptionPane.WARNING_MESSAGE);
-            } else {
-                Long id = (Long) modelo.getValueAt(fila, 0);
-                seleccion[0] = buscarPorId(id);
-                dlg.dispose();
+                JOptionPane.showMessageDialog(dlg, "Selecciona un restaurante.");
+                return;
             }
+
+            seleccion[0] = (Long) tabla.getValueAt(fila, 0);
+            dlg.dispose();
         });
+
         cancelar.addActionListener(e -> dlg.dispose());
+
         sur.add(ok);
         sur.add(cancelar);
-        dlg.add(sur, BorderLayout.SOUTH);
 
+        dlg.add(sur, BorderLayout.SOUTH);
         dlg.setVisible(true);
+
         return seleccion[0];
     }
 
     private void mostrarDialogoBusqueda() {
         DefaultTableModel modelo = crearModeloTabla();
+
         JTable tabla = new JTable(modelo);
         tabla.setRowHeight(24);
 
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this),
-                "Restaurantes registrados", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Restaurantes registrados", Dialog.ModalityType.APPLICATION_MODAL);
+
         dlg.setSize(820, 450);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout(10, 10));
+
         dlg.getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         dlg.add(new JScrollPane(tabla), BorderLayout.CENTER);
 
         JButton cerrar = new JButton("Cerrar");
         cerrar.addActionListener(e -> dlg.dispose());
+
         JPanel sur = new JPanel();
         sur.add(cerrar);
-        dlg.add(sur, BorderLayout.SOUTH);
 
+        dlg.add(sur, BorderLayout.SOUTH);
         dlg.setVisible(true);
     }
 
     private DefaultTableModel crearModeloTabla() {
-        String[] cols = {"ID", "Nombre", "Teléfono", "Tipo cocina", "Calle", "Ciudad", "Mesas"};
-        DefaultTableModel m = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+        String[] columnas = {"ID", "Nombre", "Teléfono", "Tipo de cocina", "Calle", "Ciudad", "Cantidad de mesas"};
+
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;
+            }
         };
 
-        RestaurantDAO restaurantDAO = new RestaurantDAO();
-        AddressDAO addressDAO = new AddressDAO();
-        DiningTableDAO diningTableDAO = new DiningTableDAO();
+        List<RestaurantDTO> restaurantes = restaurantDAO.consultarTodos();
 
-        Map<Long, AddressDTO> direcciones = new HashMap<>();
-        for (AddressDTO a : addressDAO.consultarTodos()) {
-            direcciones.put(a.getId(), a);
-        }
+        for (RestaurantDTO restaurante : restaurantes) {
+            AddressDTO direccion = addressDAO.consultarPorId(restaurante.getAddressId());
 
-        Map<Long, DiningTableDTO> mesas = new HashMap<>();
-        for (DiningTableDTO d : diningTableDAO.consultarTodos()) {
-            mesas.put(d.getRestaurantId(), d);
-        }
+            List<DiningTableDTO> mesas = diningTableDAO.consultarPorRestaurante(restaurante.getId());
 
-        for (RestaurantDTO r : restaurantDAO.consultarTodos()) {
-            AddressDTO a = direcciones.get(r.getAddressId());
-            DiningTableDTO d = mesas.get(r.getId());
-
-            m.addRow(new Object[]{
-                    r.getId(),
-                    r.getName(),
-                    r.getTelephone() == null ? "" : r.getTelephone(),
-                    r.getKitchenType(),
-                    a == null ? "" : a.getStreet(),
-                    a == null ? "" : a.getCity(),
-                    d == null ? "" : d.getNumber()
-
+            modelo.addRow(new Object[]{
+                restaurante.getId(),
+                restaurante.getName(),
+                restaurante.getTelephone() == null ? "" : restaurante.getTelephone(),
+                restaurante.getKitchenType(),
+                direccion == null ? "" : direccion.getStreet(),
+                direccion == null ? "" : direccion.getCity(),
+                mesas.size()
             });
         }
-        return m;
+
+        return modelo;
     }
 
     private void limpiar() {
         idActual = null;
-        txtNombre.setText(""); txtTelefono.setText(""); txtTipoCocina.setText("");
-        txtCalle.setText(""); txtEstado.setText(""); txtCP.setText("");
-        txtCiudad.setText(""); txtNumero.setText("");
+
+        txtNombre.setText("");
+        txtTelefono.setText("");
+        txtTipoCocina.setText("");
+        txtCalle.setText("");
+        txtEstado.setText("");
+        txtCP.setText("");
+        txtCiudad.setText("");
+        txtNumero.setText("");
         txtCapMesa.setText("");
+
         mesasEnEdicion.clear();
         modeloListaMesas.clear();
+
         lblStatus.setText(" ");
     }
+    
+    private boolean actualizar() {
+        if (idActual == null) {
+            mostrarError("Selecciona un restaurante para actualizar.");
+            return false;
+        }
 
-    private FilaRestaurante buscarPorId(Long id) {
-        for (FilaRestaurante r : filas) if (r.id.equals(id)) return r;
-        return null;
+        if (!validarFormulario()) {
+            return false;
+        }
+
+        RestaurantDTO restauranteActual = restaurantDAO.consultarPorId(idActual);
+
+        if (restauranteActual == null) {
+            mostrarError("El restaurante ya no existe en la base de datos.");
+            return false;
+        }
+
+        AddressDTO direccion = obtenerDireccionFormulario();
+        String resultadoDireccion = addressDAO.actualizar(restauranteActual.getAddressId(), direccion);
+
+        if (!resultadoDireccion.startsWith("Dirección actualizada correctamente")) {
+            mostrarError(resultadoDireccion);
+            return false;
+        }
+
+        RestaurantDTO restaurante = new RestaurantDTO(txtNombre.getText().trim(), txtTelefono.getText().trim(), txtTipoCocina.getText().trim(), restauranteActual.getAddressId());
+        String resultadoRestaurante = restaurantDAO.actualizar(idActual, restaurante);
+
+        if (!resultadoRestaurante.startsWith("Restaurante actualizado correctamente")) {
+            mostrarError(resultadoRestaurante);
+            return false;
+        }
+
+        if (!sincronizarMesas(idActual)) {
+            return false;
+        }
+
+        Long idGuardado = idActual;
+
+        limpiar();
+        mostrarExito("Restaurante #" + idGuardado + " actualizado correctamente.");
+
+        return true;
+    }
+    
+    private boolean sincronizarMesas(Long restaurantId) {
+        List<DiningTableDTO> mesasBD = diningTableDAO.consultarPorRestaurante(restaurantId);
+
+        for (DiningTableDTO mesaBD : mesasBD) {
+            boolean existe = false;
+
+            for (DiningTableDTO mesaFormulario : mesasEnEdicion) {
+                if (mesaFormulario.getId() != null && mesaFormulario.getId().equals(mesaBD.getId())) {
+                    existe = true;
+                    break;
+                }
+            }
+
+            if (!existe) {
+                String resultado = diningTableDAO.eliminar(mesaBD.getId());
+
+                if (!resultado.startsWith("Mesa eliminada correctamente")) {
+                    mostrarError(resultado);
+                    return false;
+                }
+            }
+        }
+
+        List<DiningTableDTO> mesasNuevas = new ArrayList<>();
+
+        for (int i = 0; i < mesasEnEdicion.size(); i++) {
+            DiningTableDTO mesa = mesasEnEdicion.get(i);
+            mesa.setNumber(i + 1);
+            mesa.setRestaurantId(restaurantId);
+
+            if (mesa.getId() == null) {
+                mesasNuevas.add(mesa);
+            } else {
+                String resultado = diningTableDAO.actualizar(mesa.getId(), mesa);
+
+                if (!resultado.startsWith("Mesa actualizada correctamente")) {
+                    mostrarError(resultado);
+                    return false;
+                }
+            }
+        }
+
+        if (!mesasNuevas.isEmpty()) {
+            String resultado = diningTableDAO.guardar(mesasNuevas);
+
+            if (!resultado.startsWith("Se guardaron")) {
+                mostrarError(resultado);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void cargarRestaurante(Long id) {
+        RestaurantDTO restaurante = restaurantDAO.consultarPorId(id);
+
+        if (restaurante == null) {
+            mostrarError("No se encontró el restaurante.");
+            return;
+        }
+
+        AddressDTO direccion = addressDAO.consultarPorId(restaurante.getAddressId());
+
+        if (direccion == null) {
+            mostrarError("No se encontró la dirección del restaurante.");
+            return;
+        }
+
+        List<DiningTableDTO> mesas = diningTableDAO.consultarPorRestaurante(id);
+
+        idActual = restaurante.getId();
+
+        txtNombre.setText(restaurante.getName());
+        txtTelefono.setText(restaurante.getTelephone() == null ? "" : restaurante.getTelephone());
+        txtTipoCocina.setText(restaurante.getKitchenType());
+
+        txtCalle.setText(direccion.getStreet());
+        txtEstado.setText(direccion.getState());
+        txtCP.setText(String.valueOf(direccion.getPostCode()));
+        txtCiudad.setText(direccion.getCity());
+        txtNumero.setText(String.valueOf(direccion.getNumber()));
+
+        cargarMesasEnLista(mesas);
+
+        mostrarExito("Editando restaurante #" + idActual + ". Modifica los datos y presiona Guardar.");
+    }
+    
+    private boolean validarFormulario() {
+        if (txtNombre.getText().trim().isEmpty()) {
+            mostrarError("El nombre no puede estar vacío.");
+            return false;
+        }
+
+        if (txtNombre.getText().trim().length() > 30) {
+            mostrarError("El nombre no puede superar los 30 caracteres.");
+            return false;
+        }
+
+        if (txtTipoCocina.getText().trim().isEmpty()) {
+            mostrarError("El tipo de cocina no puede estar vacío.");
+            return false;
+        }
+
+        if (txtTipoCocina.getText().trim().length() > 100) {
+            mostrarError("El tipo de cocina no puede superar los 100 caracteres.");
+            return false;
+        }
+
+        String telefono = txtTelefono.getText().trim();
+
+        if (!telefono.isEmpty() && !TELEFONO_PATTERN.matcher(telefono).matches()) {
+            mostrarError("El teléfono debe contener exactamente 10 dígitos.");
+            return false;
+        }
+
+        if (txtCalle.getText().trim().isEmpty()) {
+            mostrarError("La calle no puede estar vacía.");
+            return false;
+        }
+
+        if (txtCalle.getText().trim().length() > 50) {
+            mostrarError("La calle no puede superar los 50 caracteres.");
+            return false;
+        }
+
+        if (txtEstado.getText().trim().isEmpty()) {
+            mostrarError("El estado no puede estar vacío.");
+            return false;
+        }
+
+        if (txtCiudad.getText().trim().isEmpty()) {
+            mostrarError("La ciudad no puede estar vacía.");
+            return false;
+        }
+
+        try {
+            int cp = Integer.parseInt(txtCP.getText().trim());
+
+            if (cp < 0 || cp > 99999) {
+                mostrarError("El código postal debe tener máximo 5 dígitos.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            mostrarError("El código postal debe ser numérico.");
+            return false;
+        }
+
+        try {
+            int numero = Integer.parseInt(txtNumero.getText().trim());
+
+            if (numero <= 0) {
+                mostrarError("El número de dirección debe ser mayor a cero.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            mostrarError("El número de dirección debe ser numérico.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private AddressDTO obtenerDireccionFormulario() {
+        return new AddressDTO(txtCalle.getText().trim(), txtEstado.getText().trim(), Integer.parseInt(txtCP.getText().trim()), txtCiudad.getText().trim(), Integer.parseInt(txtNumero.getText().trim()));
     }
 }
