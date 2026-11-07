@@ -1,6 +1,19 @@
 package Presentacion.Paneles;
 
+import DAO.CustomerDAO;
+import DAO.DiningTableDAO;
+import DAO.ReservationDAO;
+import DAO.RestaurantDAO;
+import DTO.CustomerDTO;
+import DTO.DiningTableDTO;
+import DTO.ReservationDTO;
+import DTO.RestaurantDTO;
 import Entidades.DiningTable;
+import Interfaces.ICustomerDAO;
+import Interfaces.IDiningTableDAO;
+import Interfaces.IReservationDAO;
+import Interfaces.IRestaurantDAO;
+import Mappers.DiningTableMapper;
 import Presentacion.Componentes.Button;
 import Presentacion.Coordinador.Coordinador;
 
@@ -23,10 +36,19 @@ public class PanelReservacion extends JPanel {
     private static final DateTimeFormatter HORA_FMT  = DateTimeFormatter.ofPattern("HH:mm");
 
     private final Coordinador coordinador;
+    private final ICustomerDAO clienteDAO = new CustomerDAO();
+    private final IRestaurantDAO restauranteDAO = new RestaurantDAO();
+    private final IDiningTableDAO mesaDAO = new DiningTableDAO();
+    private final IReservationDAO reservacionDAO = new ReservationDAO();
 
-    private JComboBox<String> cbCliente;
-    private JComboBox<String> cbRestaurante;
-    private JComboBox<DiningTable> cbMesa;
+    private List<CustomerDTO> clientes = new ArrayList<>();
+    private List<RestaurantDTO> restaurantes = new ArrayList<>();
+    private List<DiningTableDTO> mesas = new ArrayList<>();
+    private List<ReservationDTO> reservaciones = new ArrayList<>();
+
+    private JComboBox<CustomerDTO> cbCliente;
+    private JComboBox<RestaurantDTO> cbRestaurante;
+    private JComboBox<DiningTableDTO> cbMesa;
     private JTextField txtFecha, txtHora, txtPersonas;
 
     private JButton btnGuardar, btnActualizar, btnEliminar, btnBuscar;
@@ -35,23 +57,15 @@ public class PanelReservacion extends JPanel {
     private JLabel lblStatus;
     private Long idActual = null;
 
-    private static class FilaReservacion {
-        Long id;
-        String cliente, restaurante;
-        DiningTable mesa;
-        LocalDate fecha;
-        LocalTime hora;
-        int personas;
-    }
-
-    private final List<FilaReservacion> filas = new ArrayList<>();
-
     public PanelReservacion(Coordinador coordinador) {
         this.coordinador = coordinador;
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setBackground(new Color(240, 235, 220));
         construirUI();
+        
+        cargarDatosIniciales();
+        cbRestaurante.addActionListener(e -> cargarMesas());
     }
 
     private void construirUI() {
@@ -115,19 +129,47 @@ public class PanelReservacion extends JPanel {
         txtHora = new JTextField(15);
         txtPersonas = new JTextField(15);
 
-        cbCliente.addItem("Cliente de ejemplo");
-        cbRestaurante.addItem("Restaurante de ejemplo");
-        cbMesa.addItem(new DiningTable(1, 4));
+        cbCliente.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (value instanceof CustomerDTO) {
+                    CustomerDTO cliente = (CustomerDTO) value;
+                    setText(cliente.getName());
+                }
+
+                return this;
+            }
+        });
+
+        cbRestaurante.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (value instanceof RestaurantDTO) {
+                    RestaurantDTO restaurante = (RestaurantDTO) value;
+                    setText(restaurante.getName());
+                }
+
+                return this;
+            }
+        });
 
         cbMesa.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                          int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof DiningTable) {
-                    DiningTable m = (DiningTable) value;
-                    setText("Mesa " + m.getNumber() + " (cap " + m.getCapacity() + ")");
+
+                if (value instanceof DiningTableDTO) {
+                    DiningTableDTO mesa = (DiningTableDTO) value;
+                    setText("Mesa " + mesa.getNumber() + " (capacidad: " + mesa.getCapacity() + ")");
                 }
+
                 return this;
             }
         });
@@ -239,122 +281,48 @@ public class PanelReservacion extends JPanel {
     }
 
     private boolean crear() {
-        if (cbCliente.getSelectedItem() == null) {
-            mostrarError("Selecciona un cliente.");
-            return false;
-        }
-        if (cbRestaurante.getSelectedItem() == null) {
-            mostrarError("Selecciona un restaurante.");
+        ReservationDTO reservacion = obtenerDatosFormulario();
+
+        if (reservacion == null) {
             return false;
         }
 
-        DiningTable mesa = (DiningTable) cbMesa.getSelectedItem();
-        if (mesa == null) {
-            mostrarError("Selecciona una mesa.");
-            return false;
+        String resultado = reservacionDAO.guardar(reservacion);
+
+        if (resultado.startsWith("Reservación guardada correctamente")) {
+            cargarReservaciones();
+            limpiar();
+            mostrarExito(resultado);
+            return true;
         }
 
-        LocalDate fecha;
-        try {
-            fecha = LocalDate.parse(txtFecha.getText().trim(), FECHA_FMT);
-        }
-        catch (DateTimeParseException ex) {
-            mostrarError("Fecha inválida. Formato esperado: dd/MM/yyyy.");
-            return false;
-        }
-
-        LocalTime hora;
-        try {
-            hora = LocalTime.parse(txtHora.getText().trim(), HORA_FMT);
-        }
-        catch (DateTimeParseException ex) {
-            mostrarError("Hora inválida. Formato esperado: HH:mm (24 h).");
-            return false;
-        }
-
-        int personas;
-        try {
-            personas = Integer.parseInt(txtPersonas.getText().trim());
-        }
-        catch (NumberFormatException ex) {
-            mostrarError("El número de personas debe ser numérico.");
-            return false;
-        }
-
-        if (!validarPersonas(mesa, personas)) return false;
-
-        FilaReservacion fila = new FilaReservacion();
-        fila.id = (long) (filas.size() + 1);
-        fila.cliente = (String) cbCliente.getSelectedItem();
-        fila.restaurante = (String) cbRestaurante.getSelectedItem();
-        fila.mesa = mesa;
-        fila.fecha = fecha;
-        fila.hora = hora;
-        fila.personas = personas;
-
-        filas.add(fila);
-        limpiar();
-        mostrarExito("Reservación creada con ID " + fila.id + ".");
-        return true;
+        mostrarError(resultado);
+        return false;
     }
-
+    
     private boolean actualizar() {
-        FilaReservacion fila = buscarPorId(idActual);
-        if (fila == null) {
-            mostrarError("Reservación no encontrada.");
+        if (idActual == null) {
+            mostrarError("Primero selecciona una reservación para actualizar.");
             return false;
         }
 
-        if (cbCliente.getSelectedItem() == null || cbRestaurante.getSelectedItem() == null) {
-            mostrarError("Selecciona cliente y restaurante.");
+        ReservationDTO reservacion = obtenerDatosFormulario();
+
+        if (reservacion == null) {
             return false;
         }
 
-        DiningTable mesa = (DiningTable) cbMesa.getSelectedItem();
-        if (mesa == null) {
-            mostrarError("Selecciona una mesa.");
-            return false;
+        String resultado = reservacionDAO.actualizar(idActual, reservacion);
+
+        if (resultado.startsWith("Reservación actualizada correctamente")) {
+            cargarReservaciones();
+            limpiar();
+            mostrarExito(resultado);
+            return true;
         }
 
-        LocalDate fecha;
-        try {
-            fecha = LocalDate.parse(txtFecha.getText().trim(), FECHA_FMT);
-        }
-        catch (DateTimeParseException ex) {
-            mostrarError("Fecha inválida (dd/MM/yyyy).");
-            return false;
-        }
-
-        LocalTime hora;
-        try {
-            hora = LocalTime.parse(txtHora.getText().trim(), HORA_FMT);
-        }
-        catch (DateTimeParseException ex) {
-            mostrarError("Hora inválida (HH:mm).");
-            return false;
-        }
-
-        int personas;
-        try {
-            personas = Integer.parseInt(txtPersonas.getText().trim());
-        }
-        catch (NumberFormatException ex) {
-            mostrarError("Personas debe ser numérico.");
-            return false;
-        }
-
-        if (!validarPersonas(mesa, personas)) return false;
-
-        fila.cliente = (String) cbCliente.getSelectedItem();
-        fila.restaurante = (String) cbRestaurante.getSelectedItem();
-        fila.mesa = mesa;
-        fila.fecha = fecha;
-        fila.hora = hora;
-        fila.personas = personas;
-
-        limpiar();
-        mostrarExito("Reservación actualizada.");
-        return true;
+        mostrarError(resultado);
+        return false;
     }
 
     private boolean validarPersonas(DiningTable mesa, int personas) {
@@ -376,143 +344,196 @@ public class PanelReservacion extends JPanel {
     }
 
     private boolean accionActualizar() {
-        FilaReservacion sel = mostrarDialogoSeleccion("Seleccionar reservación a actualizar", "Editar");
-        if (sel == null) return false;
+        ReservationDTO sel = mostrarDialogoSeleccion("Seleccionar reservación a actualizar", "Editar");
 
-        idActual = sel.id;
-        cbCliente.setSelectedItem(sel.cliente);
-        cbRestaurante.setSelectedItem(sel.restaurante);
-        if (sel.mesa != null) {
-            boolean encontrada = false;
-            for (int i = 0; i < cbMesa.getItemCount(); i++) {
-                if (cbMesa.getItemAt(i) == sel.mesa) {
-                    cbMesa.setSelectedIndex(i);
-                    encontrada = true;
+        if (sel == null) {
+            return false;
+        }
+
+        idActual = sel.getId();
+
+        for (int i = 0; i < cbCliente.getItemCount(); i++) {
+            CustomerDTO cliente = cbCliente.getItemAt(i);
+
+            if (cliente.getId().equals(sel.getCustomerId())) {
+                cbCliente.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        boolean mesaEncontrada = false;
+
+        for (RestaurantDTO restaurante : restaurantes) {
+            List<DiningTableDTO> mesasRestaurante = mesaDAO.consultarPorRestaurante(restaurante.getId());
+
+            for (DiningTableDTO mesa : mesasRestaurante) {
+                if (mesa.getId().equals(sel.getTableId())) {
+                    cbRestaurante.setSelectedItem(restaurante);
+                    cbMesa.setSelectedItem(mesa);
+
+                    mesaEncontrada = true;
                     break;
                 }
             }
-            if (!encontrada) {
-                cbMesa.addItem(sel.mesa);
-                cbMesa.setSelectedItem(sel.mesa);
+
+            if (mesaEncontrada) {
+                break;
             }
         }
-        txtFecha.setText(sel.fecha.format(FECHA_FMT));
-        txtHora.setText(sel.hora.format(HORA_FMT));
-        txtPersonas.setText(String.valueOf(sel.personas));
-        mostrarExito("Editando reservación #" + sel.id + ". Modifica y presiona Guardar.");
+
+        if (!mesaEncontrada) {
+            mostrarError("No se encontró la mesa de esta reservación.");
+            idActual = null;
+            return false;
+        }
+
+        txtFecha.setText(sel.getDate().format(FECHA_FMT));
+        txtHora.setText(sel.getHour().format(HORA_FMT));
+        txtPersonas.setText(String.valueOf(sel.getNumberPeople()));
+
+        mostrarExito("Editando reservación #" + sel.getId() + ". Modifica los datos y presiona Guardar.");
+
         return true;
     }
 
     private boolean accionEliminar() {
-        FilaReservacion sel = mostrarDialogoSeleccion("Seleccionar reservación a eliminar", "Eliminar");
-        if (sel == null) return false;
+        ReservationDTO sel = mostrarDialogoSeleccion("Seleccionar reservación a eliminar", "Eliminar");
 
-        int r = JOptionPane.showConfirmDialog(this,
-                "¿Eliminar reservación #" + sel.id + "?",
-                "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (r != JOptionPane.YES_OPTION) return false;
+        if (sel == null) {
+            return false;
+        }
 
-        filas.remove(sel);
-        if (idActual != null && idActual.equals(sel.id)) limpiar();
-        mostrarExito("Reservación eliminada.");
-        return true;
+        int r = JOptionPane.showConfirmDialog(this, "¿Eliminar reservación #" + sel.getId() + "?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (r != JOptionPane.YES_OPTION) {
+            return false;
+        }
+
+        String resultado = reservacionDAO.eliminar(sel.getId());
+
+        if (resultado.startsWith("Reservación eliminada correctamente")) {
+            cargarReservaciones();
+
+            if (idActual != null && idActual.equals(sel.getId())) {
+                limpiar();
+            }
+
+            mostrarExito(resultado);
+            return true;
+        }
+
+        mostrarError(resultado);
+        return false;
     }
 
     private boolean accionBuscar() {
-        if (filas.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay registros disponibles.",
-                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+        cargarReservaciones();
+
+        if (reservaciones.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay reservaciones registradas.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
+
         mostrarDialogoBusqueda();
         return true;
-    }
+}
 
-    private FilaReservacion mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
-        if (filas.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay registros disponibles.",
-                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+    private ReservationDTO mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
+        cargarReservaciones();
+
+        if (reservaciones.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay reservaciones registradas.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return null;
         }
 
         DefaultTableModel modelo = crearModeloTabla();
         JTable tabla = new JTable(modelo);
+
         tabla.setRowHeight(24);
         tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabla.setRowSelectionInterval(0, 0);
 
-        final FilaReservacion[] seleccion = {null};
+        final ReservationDTO[] seleccion = {null};
 
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), titulo,
-                Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), titulo, Dialog.ModalityType.APPLICATION_MODAL);
+
         dlg.setSize(820, 420);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout(10, 10));
         dlg.getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         dlg.add(new JScrollPane(tabla), BorderLayout.CENTER);
 
         JPanel sur = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+
         JButton ok = new JButton(textoBotonOk);
         JButton cancelar = new JButton("Cancelar");
+
         ok.addActionListener(e -> {
             int fila = tabla.getSelectedRow();
+
             if (fila < 0) {
-                JOptionPane.showMessageDialog(dlg, "Selecciona un registro.",
-                        "Aviso", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(dlg, "Selecciona un registro.");
             } else {
                 Long id = (Long) modelo.getValueAt(fila, 0);
-                seleccion[0] = buscarPorId(id);
+                seleccion[0] = reservacionDAO.consultarPorId(id);
                 dlg.dispose();
             }
         });
+
         cancelar.addActionListener(e -> dlg.dispose());
+
         sur.add(ok);
         sur.add(cancelar);
-        dlg.add(sur, BorderLayout.SOUTH);
 
+        dlg.add(sur, BorderLayout.SOUTH);
         dlg.setVisible(true);
+
         return seleccion[0];
     }
 
     private void mostrarDialogoBusqueda() {
+        cargarReservaciones();
+
         DefaultTableModel modelo = crearModeloTabla();
         JTable tabla = new JTable(modelo);
         tabla.setRowHeight(24);
 
-        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this),
-                "Reservaciones registradas", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dlg = new JDialog(SwingUtilities.getWindowAncestor(this), "Reservaciones registradas", Dialog.ModalityType.APPLICATION_MODAL);
+
         dlg.setSize(820, 450);
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout(10, 10));
         dlg.getRootPane().setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         dlg.add(new JScrollPane(tabla), BorderLayout.CENTER);
 
         JButton cerrar = new JButton("Cerrar");
         cerrar.addActionListener(e -> dlg.dispose());
+
         JPanel sur = new JPanel();
         sur.add(cerrar);
-        dlg.add(sur, BorderLayout.SOUTH);
 
+        dlg.add(sur, BorderLayout.SOUTH);
         dlg.setVisible(true);
     }
 
-    private DefaultTableModel crearModeloTabla() {
-        String[] cols = {"ID", "Cliente", "Restaurante", "Mesa", "Fecha", "Hora", "Personas"};
-        DefaultTableModel m = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        for (FilaReservacion r : filas) {
-            m.addRow(new Object[]{
-                    r.id,
-                    r.cliente == null ? "-" : r.cliente,
-                    r.restaurante == null ? "-" : r.restaurante,
-                    r.mesa == null ? "-" : formatoMesa(r.mesa),
-                    r.fecha, r.hora, r.personas
-            });
-        }
-        return m;
-    }
+   private DefaultTableModel crearModeloTabla() {
+        String[] columnas = {"ID", "Cliente", "Mesa", "Capacidad", "Fecha", "Hora", "Personas"};
 
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;
+            }
+        };
+
+        for (ReservationDTO r : reservaciones) {
+            modelo.addRow(new Object[]{r.getId(), r.getCustomerName(), r.getTableNumber(), r.getTableCapacity(), r.getDate(), r.getHour(), r.getNumberPeople()});
+        }
+
+        return modelo;
+    }
     private void limpiar() {
         idActual = null;
         if (cbCliente.getItemCount() > 0) cbCliente.setSelectedIndex(0);
@@ -521,9 +542,137 @@ public class PanelReservacion extends JPanel {
         txtFecha.setText(""); txtHora.setText(""); txtPersonas.setText("");
         lblStatus.setText(" ");
     }
+    
+    private void cargarDatosIniciales() {
+        try {
+            clientes = clienteDAO.consultarTodos();
+            cbCliente.removeAllItems();
 
-    private FilaReservacion buscarPorId(Long id) {
-        for (FilaReservacion r : filas) if (r.id.equals(id)) return r;
-        return null;
+            for (CustomerDTO cliente : clientes) {
+                cbCliente.addItem(cliente);
+            }
+
+            restaurantes = restauranteDAO.consultarTodos();
+            cbRestaurante.removeAllItems();
+
+            for (RestaurantDTO restaurante : restaurantes) {
+                cbRestaurante.addItem(restaurante);
+            }
+
+            cargarMesas();
+            cargarReservaciones();
+
+        } catch (Exception e) {
+            mostrarError("Error al cargar los datos: " + e.getMessage());
+        }
+    }
+    
+    private void cargarMesas() {
+
+        cbMesa.removeAllItems();
+        RestaurantDTO restaurante = (RestaurantDTO) cbRestaurante.getSelectedItem();
+
+        if (restaurante == null) {
+            return;
+        }
+
+        mesas = mesaDAO.consultarPorRestaurante(restaurante.getId());
+
+        for (DiningTableDTO mesa : mesas) {
+            cbMesa.addItem(mesa);
+        }
+
+        if (mesas.isEmpty()) {
+            mostrarError("El restaurante no tiene mesas registradas.");
+        }
+    }
+    
+    private CustomerDTO obtenerClienteSeleccionado() {
+        return (CustomerDTO) cbCliente.getSelectedItem();
+    }
+
+    private RestaurantDTO obtenerRestauranteSeleccionado() {
+        return (RestaurantDTO) cbRestaurante.getSelectedItem();
+    }
+
+    private DiningTableDTO obtenerMesaSeleccionada() {
+        return (DiningTableDTO) cbMesa.getSelectedItem();
+    }
+
+    private ReservationDTO obtenerDatosFormulario() {
+        CustomerDTO cliente = obtenerClienteSeleccionado();
+        DiningTableDTO mesa = obtenerMesaSeleccionada();
+
+        if (cliente == null) {
+            mostrarError("Selecciona un cliente.");
+            return null;
+        }
+
+        if (obtenerRestauranteSeleccionado() == null) {
+            mostrarError("Selecciona un restaurante.");
+            return null;
+        }
+
+        if (mesa == null) {
+            mostrarError("Selecciona una mesa.");
+            return null;
+        }
+
+        LocalDate fecha;
+        try {
+            fecha = LocalDate.parse(txtFecha.getText().trim(), FECHA_FMT);
+        } catch (DateTimeParseException ex) {
+            mostrarError("Fecha inválida. Formato esperado: dd/MM/yyyy.");
+            return null;
+        }
+
+        LocalTime hora;
+        try {
+            hora = LocalTime.parse(txtHora.getText().trim(), HORA_FMT);
+        } catch (DateTimeParseException ex) {
+            mostrarError("Hora inválida. Formato esperado: HH:mm.");
+            return null;
+        }
+
+        int personas;
+        try {
+            personas = Integer.parseInt(txtPersonas.getText().trim());
+        } catch (NumberFormatException ex) {
+            mostrarError("El número de personas debe ser numérico.");
+            return null;
+        }
+
+        if (!validarPersonas(mesa, personas)) {
+            return null;
+        }
+
+        return new ReservationDTO(fecha, hora, personas, cliente.getId(), cliente.getName(), mesa.getId(), mesa.getNumber(), mesa.getCapacity());
+    }
+
+    private boolean validarPersonas(DiningTableDTO mesa, int personas) {
+        if (personas <= 0) {
+            mostrarError("El número de personas debe ser mayor a 0.");
+            return false;
+        }
+
+        int capacidad = mesa.getCapacity();
+
+        if (personas > capacidad) {
+            mostrarError("El número de personas supera la capacidad de la mesa.");
+            return false;
+        }
+
+        int minimo = Math.max(1, capacidad - 2);
+
+        if (personas < minimo) {
+            mostrarError("La mesa " + mesa.getNumber() + " requiere un mínimo de " + minimo + " personas.");
+            return false;
+        }
+
+        return true;
+    }
+    
+    private void cargarReservaciones() {
+        reservaciones = reservacionDAO.consultarTodos();
     }
 }
