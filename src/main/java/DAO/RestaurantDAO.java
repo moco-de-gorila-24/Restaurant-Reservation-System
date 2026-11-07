@@ -6,6 +6,7 @@ package DAO;
 
 import Configuracion.JPAUtil;
 import DTO.RestaurantDTO;
+import Entidades.Address;
 import Entidades.Restaurant;
 import Interfaces.IRestaurantDAO;
 import Mappers.RestaurantMapper;
@@ -21,13 +22,9 @@ import javax.persistence.EntityTransaction;
 public class RestaurantDAO implements IRestaurantDAO {
 
     @Override
-    public String guardar(RestaurantDTO dto) {
-        if (dto == null) {
-            return "Error: los datos del restaurante son obligatorios.";
-        }
-
-        if (!datosValidos(dto)) {
-            return "Error: revisa los campos obligatorios del restaurante y de su dirección.";
+    public Long guardar(RestaurantDTO dto) {
+        if (dto == null || !datosValidos(dto)) {
+            return null;
         }
 
         EntityManager em = null;
@@ -38,18 +35,26 @@ public class RestaurantDAO implements IRestaurantDAO {
             tx = em.getTransaction();
             tx.begin();
 
-            Restaurant restaurant = RestaurantMapper.toEntity(dto);
-            em.persist(restaurant);
+            Address address = em.find(Address.class, dto.getAddressId());
+            if (address == null) {
+                tx.rollback();
+                return null;
+            }
 
+            Restaurant restaurant = RestaurantMapper.toEntity(dto);
+            restaurant.setAddress(address);
+
+            em.persist(restaurant);
             tx.commit();
 
-            return "Restaurante guardado correctamente. ID: " + restaurant.getId();
+            return restaurant.getId();
 
         } catch (Exception ex) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
             }
-            return "Error al guardar el restaurante: " + ex.getMessage();
+            ex.printStackTrace();   // temporal
+            return null;
 
         } finally {
             if (em != null && em.isOpen()) {
@@ -193,13 +198,19 @@ public class RestaurantDAO implements IRestaurantDAO {
      * Valida los datos antes de persistir.
      */
     private boolean datosValidos(RestaurantDTO dto) {
-        return dto.getName() != null
-            && !dto.getName().trim().isEmpty()
-            && dto.getKitchenType() != null
-            && !dto.getKitchenType().trim().isEmpty()
-            && dto.getStreet() != null
-            && !dto.getStreet().trim().isEmpty()
-            && dto.getPostCode() > 0
-            && dto.getNumber() > 0;
+        String name = dto.getName();
+        String kitchen = dto.getKitchenType();
+        String phone = dto.getTelephone();
+
+        if (name == null || name.trim().isEmpty() || name.length() > 30) {
+            return false;
+        }
+        if (kitchen == null || kitchen.trim().isEmpty() || kitchen.length() > 100) {
+            return false;
+        }
+        if (phone != null && !phone.trim().isEmpty() && !phone.matches("\\d{1,10}")) {
+            return false;
+        }
+        return dto.getAddressId() != null && dto.getAddressId() > 0;
     }
 }

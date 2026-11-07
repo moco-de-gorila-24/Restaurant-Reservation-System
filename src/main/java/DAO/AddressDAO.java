@@ -24,30 +24,28 @@ import javax.persistence.EntityTransaction;
 public class AddressDAO implements IAddressDAO {
 
     @Override
-    public boolean agregar(AddressDTO addressDTO) {
+    public Long agregar(AddressDTO addressDTO) {
         AddressMapper am = new AddressMapper();
         EntityManager em = JPAUtil.crearEntityManager();
         EntityTransaction tx = em.getTransaction();
 
         try{
-            am.toEntity(addressDTO);
-
             tx.begin();
-
-            em.persist(addressDTO);
-
+            Address address = AddressMapper.toEntity(addressDTO);
+            em.persist(address);
             tx.commit();
+            return address.getId();
 
         }
         catch (Exception e){
             if (tx.isActive()) {
                 tx.rollback();
             }
+            return null;
         }
         finally {
             em.close();
         }
-        return false;
     }
 
     @Override

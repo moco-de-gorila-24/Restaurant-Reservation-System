@@ -11,7 +11,9 @@ import Entidades.Restaurant;
 import Interfaces.IDiningTableDAO;
 import Mappers.DiningTableMapper;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
@@ -22,45 +24,64 @@ import javax.persistence.EntityTransaction;
 public class DiningTableDAO implements IDiningTableDAO {
 
     @Override
-    public String guardar(DiningTableDTO mesa) {
-        if (!datosValidos(mesa)) {
-            return "Número, capacidad y restaurante son obligatorios.";
+    public String guardar(List<DiningTableDTO> mesas) {
+        System.out.println("entró a guardar mesas, cantidad=" + (mesas == null ? "null" : mesas.size()));
+        if (mesas == null || mesas.isEmpty()) {
+            return "Error: debes indicar al menos una mesa.";
+        }
+
+        Long restaurantId = mesas.get(0) == null ? null : mesas.get(0).getRestaurantId();
+        Set<Integer> numeros = new HashSet<>();
+
+        for (DiningTableDTO d : mesas) {
+            if (d == null || !datosValidos(d)) {
+                return "Número, capacidad y restaurante son obligatorios.";
+            }
+            if (!d.getRestaurantId().equals(restaurantId)) {
+                return "Error: todas las mesas deben pertenecer al mismo restaurante.";
+            }
+            if (!numeros.add(d.getNumber())) {
+                return "Error: el número de mesa " + d.getNumber() + " está repetido en la lista.";
+            }
         }
 
         EntityManager em = JPAUtil.crearEntityManager();
         EntityTransaction tx = em.getTransaction();
 
         try {
-            Restaurant restaurant = em.find(Restaurant.class, mesa.getRestaurantId());
-
+            Restaurant restaurant = em.find(Restaurant.class, restaurantId);
             if (restaurant == null) {
                 return "El restaurante seleccionado no existe.";
             }
 
-            boolean numeroDuplicado = !em.createQuery(
-                    "SELECT m FROM DiningTable m WHERE m.number = :numero AND m.restaurant.idRestaurant = :restauranteId", 
-                    DiningTable.class)
-                    .setParameter("numero", mesa.getNumber())
-                    .setParameter("restauranteId", mesa.getRestaurantId())
-                    .setMaxResults(1).getResultList().isEmpty();
+            List<Integer> repetido = em.createQuery(
+                            "SELECT m.number FROM DiningTable m "
+                                    + "WHERE m.restaurant.idRestaurant = :restauranteId AND m.number IN :numeros",
+                            Integer.class)
+                    .setParameter("restauranteId", restaurantId)
+                    .setParameter("numeros", numeros)
+                    .getResultList();
 
-            if (numeroDuplicado) {
-                return "Ese número de mesa ya existe en el restaurante.";
+            if (!repetido.isEmpty()) {
+                return "Ya existen mesas con los números " + repetido + " en este restaurante.";
             }
 
-            DiningTable entidad = DiningTableMapper.toEntity(mesa, restaurant);
+            List<DiningTable> mesasE = DiningTableMapper.toListEntity(mesas, restaurant);
 
             tx.begin();
-            em.persist(entidad);
+            for (DiningTable mesa : mesasE) {
+                restaurant.agregarMesa(mesa);
+                em.persist(mesa);
+            }
             tx.commit();
 
-            return "Mesa guardada correctamente ID: " + entidad.getId();
+            return "Se guardaron " + mesasE.size() + " mesas correctamente.";
 
         } catch (Exception e) {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            return "Error al guardar la mesa: " + e.getMessage();
+            return "Error al guardar las mesas.";
 
         } finally {
             em.close();
