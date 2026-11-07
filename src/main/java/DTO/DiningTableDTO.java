@@ -14,24 +14,19 @@ public class DiningTableDTO {
     private int number;
     private int capacity;
     private Long restaurantId;
-    private String restaurantName;
 
     public DiningTableDTO() {
     }
 
-    public DiningTableDTO(int number, int capacity, Long restaurantId, String restaurantName) {
+    public DiningTableDTO(int number, int capacity) {
         this.number = number;
         this.capacity = capacity;
-        this.restaurantId = restaurantId;
-        this.restaurantName = restaurantName;
     }
 
-    public DiningTableDTO(Long id, int number, int capacity, Long restaurantId, String restaurantName) {
-        this.id = id;
+    public DiningTableDTO( int number, int capacity, Long restaurantId) {
         this.number = number;
         this.capacity = capacity;
         this.restaurantId = restaurantId;
-        this.restaurantName = restaurantName;
     }
 
     public Long getId() {
@@ -64,14 +59,6 @@ public class DiningTableDTO {
 
     public void setRestaurantId(Long restaurantId) {
         this.restaurantId = restaurantId;
-    }
-
-    public String getRestaurantName() {
-        return restaurantName;
-    }
-
-    public void setRestaurantName(String restaurantName) {
-        this.restaurantName = restaurantName;
     }
 
     @Override

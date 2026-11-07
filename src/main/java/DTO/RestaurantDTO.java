@@ -14,43 +14,24 @@ public class RestaurantDTO {
     private String name;
     private String telephone;
     private String kitchenType;
-
     private Long addressId;
-    private String street;
-    private String state;
-    private int postCode;
-    private String city;
-    private int number;
 
     public RestaurantDTO() {
     }
 
-    public RestaurantDTO(String name, String telephone, String kitchenType, Long addressId, String street, String state, int postCode, String city, int number) {
-
-        this.id = id;
+    public RestaurantDTO(String name, String telephone, String kitchenType, Long addressId) {
         this.name = name;
         this.telephone = telephone;
         this.kitchenType = kitchenType;
         this.addressId = addressId;
-        this.street = street;
-        this.state = state;
-        this.postCode = postCode;
-        this.city = city;
-        this.number = number;
     }
 
-    public RestaurantDTO(Long id, String name, String telephone, String kitchenType, Long addressId, String street, String state, int postCode, String city, int number) {
-
+    public RestaurantDTO(Long id, String name, String telephone, String kitchenType, Long addressId) {
         this.id = id;
         this.name = name;
         this.telephone = telephone;
         this.kitchenType = kitchenType;
         this.addressId = addressId;
-        this.street = street;
-        this.state = state;
-        this.postCode = postCode;
-        this.city = city;
-        this.number = number;
     }
 
     public Long getId() {
@@ -91,45 +72,5 @@ public class RestaurantDTO {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public int getPostCode() {
-        return postCode;
-    }
-
-    public void setPostCode(int postCode) {
-        this.postCode = postCode;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
     }
 }
