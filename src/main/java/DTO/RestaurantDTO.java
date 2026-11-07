@@ -38,39 +38,44 @@ public class RestaurantDTO {
         return id;
     }
 
-    public void setId(Long id) {
+    public RestaurantDTO setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public RestaurantDTO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getTelephone() {
         return telephone;
     }
 
-    public void setTelephone(String telephone) {
+    public RestaurantDTO setTelephone(String telephone) {
         this.telephone = telephone;
+        return this;
     }
 
     public String getKitchenType() {
         return kitchenType;
     }
 
-    public void setKitchenType(String kitchenType) {
+    public RestaurantDTO setKitchenType(String kitchenType) {
         this.kitchenType = kitchenType;
+        return this;
     }
 
     public Long getAddressId() {
         return addressId;
     }
 
-    public void setAddressId(Long addressId) {
+    public RestaurantDTO setAddressId(Long addressId) {
         this.addressId = addressId;
+        return this;
     }
 }

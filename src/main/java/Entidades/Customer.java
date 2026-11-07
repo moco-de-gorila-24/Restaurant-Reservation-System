@@ -45,32 +45,36 @@ public class Customer implements Serializable {
         return idCustomer;
     }
 
-    public void setId(Long id) {
+    public Customer setId(Long id) {
         this.idCustomer = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Customer setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public Customer setEmail(String email) {
         this.email = email;
+        return this;
     }
 
     public List<String> getTelephone() {
         return telephone;
     }
 
-    public void setTelephone(List<String> telephone) {
+    public Customer setTelephone(List<String> telephone) {
         this.telephone = telephone;
+        return this;
     }
 
 }

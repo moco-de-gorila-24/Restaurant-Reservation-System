@@ -18,10 +18,6 @@ public class Address implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDireccion;
 
-    public Long getId() {
-        return idDireccion;
-    }
-
     @Column(name = "street", nullable = false, length = 50)
     private String street;
 
@@ -48,56 +44,67 @@ public class Address implements Serializable {
         this.number = number;
     }
 
-    public void setId(Long id) {
+    public Long getId() {
+        return idDireccion;
+    }
+
+    public Address setId(Long id) {
         this.idDireccion = id;
+        return this;
     }
 
     public Long getIdDireccion() {
         return idDireccion;
     }
 
-    public void setIdDireccion(Long idDireccion) {
+    public Address setIdDireccion(Long idDireccion) {
         this.idDireccion = idDireccion;
+        return this;
     }
 
     public String getStreet() {
         return street;
     }
 
-    public void setStreet(String street) {
+    public Address setStreet(String street) {
         this.street = street;
+        return this;
     }
 
     public int getPostCode() {
         return postCode;
     }
 
-    public void setPostCode(int postCode) {
+    public Address setPostCode(int postCode) {
         this.postCode = postCode;
+        return this;
     }
 
     public String getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public Address setState(String state) {
         this.state = state;
+        return this;
     }
 
     public String getCity() {
         return city;
     }
 
-    public void setCity(String city) {
+    public Address setCity(String city) {
         this.city = city;
+        return this;
     }
 
     public int getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public Address setNumber(int number) {
         this.number = number;
+        return this;
     }
 
 }

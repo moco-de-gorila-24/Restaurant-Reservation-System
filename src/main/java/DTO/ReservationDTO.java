@@ -16,6 +16,7 @@ public class ReservationDTO {
     private Long id;
     private LocalDate date;
     private LocalTime hour;
+    private LocalTime endTime;  
     private int numberPeople;
 
     private Long customerId;
@@ -55,74 +56,92 @@ public class ReservationDTO {
         return id;
     }
 
-    public void setId(Long id) {
+    public ReservationDTO setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public ReservationDTO setDate(LocalDate date) {
         this.date = date;
+        return this;
     }
 
     public LocalTime getHour() {
         return hour;
     }
 
-    public void setHour(LocalTime hour) {
+    public ReservationDTO setHour(LocalTime hour) {
         this.hour = hour;
+        return this;
+    }
+    
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public ReservationDTO setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+        return this;
     }
 
     public int getNumberPeople() {
         return numberPeople;
     }
 
-    public void setNumberPeople(int numberPeople) {
+    public ReservationDTO setNumberPeople(int numberPeople) {
         this.numberPeople = numberPeople;
+        return this;
     }
 
     public Long getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(Long customerId) {
+    public ReservationDTO setCustomerId(Long customerId) {
         this.customerId = customerId;
+        return this;
     }
 
     public String getCustomerName() {
         return customerName;
     }
 
-    public void setCustomerName(String customerName) {
+    public ReservationDTO setCustomerName(String customerName) {
         this.customerName = customerName;
+        return this;
     }
 
     public Long getTableId() {
         return tableId;
     }
 
-    public void setTableId(Long tableId) {
+    public ReservationDTO setTableId(Long tableId) {
         this.tableId = tableId;
+        return this;
     }
 
     public int getTableNumber() {
         return tableNumber;
     }
 
-    public void setTableNumber(int tableNumber) {
+    public ReservationDTO setTableNumber(int tableNumber) {
         this.tableNumber = tableNumber;
+        return this;
     }
 
     public int getTableCapacity() {
         return tableCapacity;
     }
 
-    public void setTableCapacity(int tableCapacity) {
+    public ReservationDTO setTableCapacity(int tableCapacity) {
         this.tableCapacity = tableCapacity;
+        return this;
     }
-
+    
     @Override
     public String toString() {
         return "Numero de reservación:" + id + " - Fecha: " + date + " - Hora: " + hour + " - Personas: " + numberPeople;

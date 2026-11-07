@@ -29,40 +29,39 @@ public class DiningTableDTO {
         this.restaurantId = restaurantId;
     }
 
-    public Long getId() {
+        public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public DiningTableDTO setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public int getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public DiningTableDTO setNumber(int number) {
         this.number = number;
+        return this;
     }
 
     public int getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public DiningTableDTO setCapacity(int capacity) {
         this.capacity = capacity;
+        return this;
     }
 
     public Long getRestaurantId() {
         return restaurantId;
     }
 
-    public void setRestaurantId(Long restaurantId) {
+    public DiningTableDTO setRestaurantId(Long restaurantId) {
         this.restaurantId = restaurantId;
-    }
-
-    @Override
-    public String toString() {
-        return "Mesa " + number + " = capacidad: " + capacity;
+        return this;
     }
 }

@@ -106,6 +106,8 @@ public class ReservationDAO implements IReservationDAO {
             Reservation entidad = ReservationMapper.toEntity(reservacion, customer, table);
 
             tx.begin();
+            
+            entidad.setEndTime(reservacion.getHour().plusHours(4));
             em.persist(entidad);
             tx.commit(); 
 
@@ -203,6 +205,7 @@ public class ReservationDAO implements IReservationDAO {
 
             tx.begin();
             ReservationMapper.actualizarEntidad(entidad, reservacion, customer, table);
+            entidad.setEndTime(reservacion.getHour().plusHours(2));
             tx.commit();
 
             return "Reservación actualizada correctamente.";
@@ -335,24 +338,29 @@ public class ReservationDAO implements IReservationDAO {
                 && reservacion.getTableId() > 0;
     }
 
-    private boolean mesaOcupada(EntityManager em, ReservationDTO reservacion, Long idExcluir) {
+        private boolean mesaOcupada(EntityManager em, ReservationDTO reservacion, Long idExcluir) {
+            LocalTime nuevaHoraInicio = reservacion.getHour();
+            LocalTime nuevaHoraFin = reservacion.getHour().plusHours(4);
 
-        String jpql = "SELECT COUNT(r) FROM Reservation r WHERE r.diningTable.idTable = :mesaId AND r.date = :fecha AND r.hour = :hora";
+            // La consulta JPQL con la lógica de intersección de rangos
+            String jpql = "SELECT COUNT(r) FROM Reservation r " + "WHERE r.diningTable.idTable = :mesaId " + "AND r.date = :fecha " +
+                          "AND :nuevaHoraInicio < r.endTime " + "AND :nuevaHoraFin > r.hour";
 
-        if (idExcluir != null) {
-            jpql += " AND r.idReservation <> :idExcluir";
+            if (idExcluir != null) {
+                jpql += " AND r.idReservation <> :idExcluir";
+            }
+
+            javax.persistence.TypedQuery<Long> query = em.createQuery(jpql, Long.class)
+                    .setParameter("mesaId", reservacion.getTableId())
+                    .setParameter("fecha", reservacion.getDate())
+                    .setParameter("nuevaHoraInicio", nuevaHoraInicio)
+                    .setParameter("nuevaHoraFin", nuevaHoraFin);
+
+            if (idExcluir != null) {
+                query.setParameter("idExcluir", idExcluir);
+            }
+
+            return query.getSingleResult() > 0;
         }
-
-        javax.persistence.TypedQuery<Long> query = em.createQuery(jpql, Long.class)
-                .setParameter("mesaId", reservacion.getTableId())
-                .setParameter("fecha", reservacion.getDate())
-                .setParameter("hora", reservacion.getHour());
-
-        if (idExcluir != null) {
-            query.setParameter("idExcluir", idExcluir);
-        }
-
-        return query.getSingleResult() > 0;
-    }
   
 }

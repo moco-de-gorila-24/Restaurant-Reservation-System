@@ -26,6 +26,9 @@ public class Reservation implements Serializable {
     @Column(name = "hour")
     private LocalTime hour;
     
+    @Column(name = "endTime", nullable = false)
+    private LocalTime endTime;
+    
     @Column(name = "number_people", nullable = false)
     private int numberPeople;
 
@@ -50,48 +53,63 @@ public class Reservation implements Serializable {
         return idReservation;
     }
 
-    public void setId(Long id) {
-    this.idReservation = id;
+    public Reservation setId(Long id) {
+        this.idReservation = id;
+        return this;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public Reservation setDate(LocalDate date) {
         this.date = date;
+        return this;
     }
 
     public LocalTime getHour() {
         return hour;
     }
 
-    public void setHour(LocalTime hour) {
+    public Reservation setHour(LocalTime hour) {
         this.hour = hour;
+        return this;
     }
     
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public Reservation setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+        return this;
+    }
+
     public int getNumberPeople() {
         return numberPeople;
     }
 
-    public void setNumberPeople(int numberPeople) {
+    public Reservation setNumberPeople(int numberPeople) {
         this.numberPeople = numberPeople;
+        return this;
     }
 
     public Customer getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
+    public Reservation setCustomer(Customer customer) {
         this.customer = customer;
+        return this;
     }
 
     public DiningTable getDiningTable() {
         return diningTable;
     }
 
-    public void setDiningTable(DiningTable diningTable) {
+    public Reservation setDiningTable(DiningTable diningTable) {
         this.diningTable = diningTable;
+        return this;
     }
-    
+        
 }

@@ -47,55 +47,62 @@ public class CustomerDTO {
         return id;
     }
 
-    public void setId(Long id) {
+    public CustomerDTO setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public CustomerDTO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public CustomerDTO setEmail(String email) {
         this.email = email;
+        return this;
     }
 
     public List<String> getTelephone() {
         return telephone;
     }
 
-    public void setTelephone(List<String> telephone) {
+    public CustomerDTO setTelephone(List<String> telephone) {
         this.telephone = telephone == null ? new ArrayList<>() : new ArrayList<>(telephone);
+        return this;
     }
 
     public boolean isPremium() {
         return premium;
     }
 
-    public void setPremium(boolean premium) {
+    public CustomerDTO setPremium(boolean premium) {
         this.premium = premium;
+        return this;
     }
 
     public int getPoints() {
         return points;
     }
 
-    public void setPoints(int points) {
+    public CustomerDTO setPoints(int points) {
         this.points = points;
+        return this;
     }
 
     public int getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public CustomerDTO setLevel(int level) {
         this.level = level;
+        return this;
     }
 }

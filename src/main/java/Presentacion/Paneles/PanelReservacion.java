@@ -139,16 +139,13 @@ public class PanelReservacion extends JPanel {
         txtPersonas = new JTextField(15);
 
         cbCliente.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-                if (value instanceof CustomerDTO) {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if(value instanceof CustomerDTO) {
                     CustomerDTO cliente = (CustomerDTO) value;
                     setText(cliente.getName());
                 }
-
                 return this;
             }
         });
@@ -295,10 +292,36 @@ public class PanelReservacion extends JPanel {
         if (reservacion == null) {
             return false;
         }
-
+        
+        CustomerDTO cliente = clienteDAO.consultarPorId(reservacion.getCustomerId());
         String resultado = reservacionDAO.guardar(reservacion);
-
+        
+        
         if (resultado.startsWith("Reservación guardada correctamente")) {
+            if (cliente != null && cliente.isPremium()) {
+                CustomerDTO clienteDespues = clienteDAO.consultarPorId(reservacion.getCustomerId());              
+                if (clienteDespues != null) {
+                    int diferenciaPuntos = clienteDespues.getPoints() - cliente.getPoints();
+                    String mensaje = "Reservación guardada exitosamente.\n\n";
+                    
+                    if (diferenciaPuntos > 0) {
+                        mensaje += "Ganaste " + diferenciaPuntos + " puntos\n";
+                    } else if (diferenciaPuntos < 0) {
+                        mensaje += "Perdiste " + Math.abs(diferenciaPuntos) + " puntos (dejaste espacios vacios).\n";
+                    }
+                    
+                    if (clienteDespues.getLevel() > cliente.getLevel()) {
+                        mensaje += "Subiste al nivel " + clienteDespues.getLevel() + ".\n";
+                    } else if (clienteDespues.getLevel() < cliente.getLevel()) {
+                        mensaje += "Bajaste al nivel" + clienteDespues.getLevel() + ".\n";
+                    }
+                    
+                    mensaje += "\nPuntos actuales: " + clienteDespues.getPoints() + 
+                               "\nNivel actual: " + clienteDespues.getLevel();
+                    
+                    JOptionPane.showMessageDialog(this, mensaje, "Reservacion premium realizada con exito", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
             cargarReservaciones();
             limpiar();
             mostrarExito(resultado);
@@ -320,10 +343,34 @@ public class PanelReservacion extends JPanel {
         if (reservacion == null) {
             return false;
         }
-
+        CustomerDTO cliente = clienteDAO.consultarPorId(reservacion.getCustomerId());
         String resultado = reservacionDAO.actualizar(idActual, reservacion);
 
         if (resultado.startsWith("Reservación actualizada correctamente")) {
+            if (cliente != null && cliente.isPremium()) {
+                CustomerDTO clienteDespues = clienteDAO.consultarPorId(reservacion.getCustomerId());              
+                if (clienteDespues != null) {
+                    int diferenciaPuntos = clienteDespues.getPoints() - cliente.getPoints();
+                    String mensaje = "Reservación actualizada con exito.\n\n";
+                    
+                    if (diferenciaPuntos > 0) {
+                        mensaje += "Ganaste " + diferenciaPuntos + " puntos\n";
+                    } else if (diferenciaPuntos < 0) {
+                        mensaje += "Perdiste " + Math.abs(diferenciaPuntos) + " puntos (dejaste espacios vacios).\n";
+                    }
+                    
+                    if (clienteDespues.getLevel() > cliente.getLevel()) {
+                        mensaje += "Subiste al nivel " + clienteDespues.getLevel() + ".\n";
+                    } else if (clienteDespues.getLevel() < cliente.getLevel()) {
+                        mensaje += "Bajaste al nivel" + clienteDespues.getLevel() + ".\n";
+                    }
+                    
+                    mensaje += "\nPuntos actuales: " + clienteDespues.getPoints() + 
+                               "\nNivel actual: " + clienteDespues.getLevel();
+                    
+                    JOptionPane.showMessageDialog(this, mensaje, "Reservacion premium realizada con exito", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
             cargarReservaciones();
             limpiar();
             mostrarExito(resultado);

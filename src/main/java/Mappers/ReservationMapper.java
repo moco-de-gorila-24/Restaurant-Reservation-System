@@ -25,6 +25,7 @@ public class ReservationMapper {
         dto.setId(entity.getId());
         dto.setDate(entity.getDate());
         dto.setHour(entity.getHour());
+        dto.setEndTime(entity.getEndTime());
         dto.setNumberPeople(entity.getNumberPeople());
 
         if (entity.getCustomer() != null) {

@@ -41,21 +41,23 @@ public class PremiumCustomer extends Customer {
         return points;
     }
 
-    public void setPoints(int points) {
+    public PremiumCustomer setPoints(int points) {
         if (points < 0) {
             throw new IllegalArgumentException("Los puntos no pueden ser negativos.");
         }
         this.points = points;
+        return this;
     }
 
     public int getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public PremiumCustomer setLevel(int level) {
         if (level < 1 || level > 5) {
             throw new IllegalArgumentException("El nivel premium debe estar entre 1 y 5.");
         }
         this.level = level;
+        return this;
     }
 }

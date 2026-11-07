@@ -42,44 +42,50 @@ public class AddressDTO {
         return id;
     }
     
-    public void setId(Long id) {
-        this.id = id;
+    public AddressDTO setId(Long id) {
+        this.id = id;  
+        return this;
     }
 
     public String getStreet() {
         return street;
     }
     
-    public void setStreet(String street) {
+    public AddressDTO setStreet(String street) {
         this.street = street;
+        return this;
     }
 
     public String getState() {
         return state;
     }
-    public void setState(String state) {
+    public AddressDTO setState(String state) {
         this.state = state;
+        return this;
     }
 
     public int getPostCode() {
         return postCode;
     }
-    public void setPostCode(int postCode) {
+    public AddressDTO setPostCode(int postCode) {
         this.postCode = postCode;
+        return this;
     }
 
     public String getCity() {
         return city;
     }
-    public void setCity(String city) {
+    public AddressDTO setCity(String city) {
         this.city = city;
+        return this;
     }
 
     public int getNumber() {
         return number;
     }
-    public void setNumber(int number) {
+    public AddressDTO setNumber(int number) {
         this.number = number;
+        return this;
     }
 
     public Long getRestaurantId() {

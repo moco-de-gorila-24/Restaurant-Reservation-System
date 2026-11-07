@@ -49,52 +49,57 @@ public class Restaurant implements Serializable {
         return idRestaurant;
     }
 
-    public void setId(Long id) {
+    public Restaurant setId(Long id) {
         this.idRestaurant = id;
+        return this;
     }
 
     public String getTelephone() {
         return telephone;
     }
 
-    public void setTelephone(String telephone) {
-    this.telephone = telephone;
+    public Restaurant setTelephone(String telephone) {
+        this.telephone = telephone;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Restaurant setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getKitchenType() {
         return kitchenType;
     }
 
-    public void setKitchenType(String kitchenType) {
+    public Restaurant setKitchenType(String kitchenType) {
         this.kitchenType = kitchenType;
+        return this;
     }
-    
+
     public Address getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public Restaurant setAddress(Address address) {
         this.address = address;
+        return this;
     }
 
     public List<DiningTable> getTables() {
         return tables;
     }
 
-    public void setTables(List<DiningTable> tables) {
+    public Restaurant setTables(List<DiningTable> tables) {
         this.tables = tables == null ? new ArrayList<>() : tables;
-
         for (DiningTable table : this.tables) {
             table.setRestaurant(this);
         }
+        return this;
     }
 
     public boolean agregarMesa(DiningTable table) {

@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class DiningTable implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTable;
 
     @Column(name = "number", nullable = false, length = 10)
@@ -41,32 +41,36 @@ public class DiningTable implements Serializable {
         return idTable;
     }
 
-    public void setId(Long id) {
+    public DiningTable setId(Long id) {
         this.idTable = id;
+        return this;
     }
 
     public int getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public DiningTable setNumber(int number) {
         this.number = number;
+        return this;
     }
 
     public int getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public DiningTable setCapacity(int capacity) {
         this.capacity = capacity;
+        return this;
     }
-    
+
     public Restaurant getRestaurant() {
         return restaurant;
     }
 
-    public void setRestaurant(Restaurant restaurant) {
+    public DiningTable setRestaurant(Restaurant restaurant) {
         this.restaurant = restaurant;
+        return this;
     }
 
     @Override
