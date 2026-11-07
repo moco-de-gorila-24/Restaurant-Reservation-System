@@ -1,13 +1,21 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package Presentacion.Componentes;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
+/**
+ *
+ * @author ACER
+ */
 public class Button extends JButton {
     private int radio = 30;
 
-    // Colores (arriba, abajo) de cada estado
+    
     private Color normalArriba = new Color(110, 128, 72);
     private Color normalAbajo = new Color(80, 95, 50);
     private Color hoverArriba = new Color(132, 150, 92);

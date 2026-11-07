@@ -34,3 +34,4 @@ out/
 # ====================
 .vscode/
 *.code-workspace
+/nbproject/
