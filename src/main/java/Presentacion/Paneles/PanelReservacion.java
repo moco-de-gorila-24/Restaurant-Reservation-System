@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package Presentacion.Paneles;
 
 import DAO.CustomerDAO;
@@ -26,6 +30,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * 
+ * @author Andres
+ */
 
 /**
  * Panel con funcionalidades CRUD de reservación

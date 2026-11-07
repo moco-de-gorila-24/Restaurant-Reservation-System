@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package Presentacion.Paneles;
 
 import DAO.AddressDAO;
@@ -6,9 +10,6 @@ import DAO.RestaurantDAO;
 import DTO.AddressDTO;
 import DTO.DiningTableDTO;
 import DTO.RestaurantDTO;
-import Entidades.Address;
-import Entidades.DiningTable;
-import Mappers.DiningTableMapper;
 import Presentacion.Componentes.Button;
 import Presentacion.Coordinador.Coordinador;
 
@@ -18,6 +19,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+/**
+ * 
+ * @author Andres
+ */
 
 /**
  * Panel con funcionalidades CRUD de restaurante

@@ -12,6 +12,8 @@ import Entidades.PremiumCustomer;
 import Entidades.Reservation;
 import Interfaces.IReservationDAO;
 import Mappers.ReservationMapper;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,7 +26,7 @@ import javax.persistence.EntityTransaction;
  */
 public class ReservationDAO implements IReservationDAO {
     
-@Override
+    @Override
     public String guardar(ReservationDTO reservacion) {
         if (!datosValidos(reservacion)) {
             return "Error: verifica la fecha, hora, cliente, mesa y número de personas.";
@@ -47,6 +49,16 @@ public class ReservationDAO implements IReservationDAO {
             int personas = reservacion.getNumberPeople();
             int capacidad = table.getCapacity();
 
+            LocalDate hoy = LocalDate.now();
+            LocalTime ahora = LocalTime.now();
+
+            if (reservacion.getDate().isBefore(hoy)) {
+                return "Error: no se puede agendar una reservación para una fecha pasada.";
+            }
+            if (reservacion.getDate().isEqual(hoy) && reservacion.getHour().isBefore(ahora)) {
+                return "Error: la hora seleccionada para hoy ya ha pasado. Por favor, elige una hora futura.";
+            }
+            
             if (personas > capacidad) {
                 return "El número de personas supera la capacidad de la mesa.";
             }
@@ -112,7 +124,7 @@ public class ReservationDAO implements IReservationDAO {
     @Override
     public String actualizar(Long id, ReservationDTO reservacion) {
         if (id == null || id <= 0 || !datosValidos(reservacion)) {
-            return "Los datos de la reservación no son válidos.";
+            return "Los datos de la reservación no son validos.";
         }
 
         EntityManager em = JPAUtil.crearEntityManager();
@@ -120,13 +132,11 @@ public class ReservationDAO implements IReservationDAO {
 
         try {
             Reservation entidad = em.find(Reservation.class, id);
-
             if (entidad == null) {
-                return "No se encontró la reservación.";
+                return "No se encontro la reservación.";
             }
 
             Customer customer = em.find(Customer.class, reservacion.getCustomerId());
-
             if (customer == null) {
                 return "El cliente seleccionado no existe.";
             }
@@ -136,18 +146,63 @@ public class ReservationDAO implements IReservationDAO {
                 return "La mesa seleccionada no existe.";
             }
 
-            if (reservacion.getNumberPeople() > table.getCapacity()) {
-                return "El número de personas supera la capacidad de la mesa.";
+            int personas = reservacion.getNumberPeople();
+            int capacidad = table.getCapacity();
+
+            LocalDate hoy = LocalDate.now();
+            LocalTime ahora = LocalTime.now();
+
+            if (reservacion.getDate().isBefore(hoy)) {
+                return "Error: no se puede agendar una reservación para una fecha pasada.";
+            }
+            if (reservacion.getDate().isEqual(hoy) && reservacion.getHour().isBefore(ahora)) {
+                return "Error: la hora seleccionada para hoy ya ha pasado. Por favor, elige una hora futura.";
+            }
+            
+            if (personas > capacidad) {
+                return "El numero de personas supera la capacidad de la mesa.";
+            }
+
+            int espaciosSobrantes = capacidad - personas;
+            int limiteSobrante = 2; 
+
+            if (customer instanceof PremiumCustomer) {
+                PremiumCustomer premium = (PremiumCustomer) customer;
+                if (premium.getLevel() >= 4) {
+                    limiteSobrante = 5;
+                }
+            }
+
+            if (espaciosSobrantes > limiteSobrante) {
+                return "La mesa no se puede reservar debido a la poca cantidad de personas. " +
+                       "Limite de diferencia permitido por el nivel de cliente: " + limiteSobrante;
             }
 
             if (mesaOcupada(em, reservacion, id)) {
-                return "Error: la mesa ya tiene una reservación en esa fecha y hora.";
+                return "La mesa ya esta reservada para esta fecha y hora.";
+            }
+
+            if (customer instanceof PremiumCustomer) {
+                PremiumCustomer premium = (PremiumCustomer) customer;
+                Random random = new Random();
+
+                premium.setPoints(premium.getPoints() + 5);
+
+                if (premium.getLevel() < 5 && random.nextInt(100) < 25) {
+                    premium.setLevel(premium.getLevel() + 1);
+                }
+                
+                if (espaciosSobrantes > 0) {
+                    premium.setPoints(Math.max(0, premium.getPoints() - 5));
+
+                    if (premium.getLevel() > 1 && random.nextInt(100) < 25) {
+                        premium.setLevel(premium.getLevel() - 1);
+                    }
+                }
             }
 
             tx.begin();
-
             ReservationMapper.actualizarEntidad(entidad, reservacion, customer, table);
-
             tx.commit();
 
             return "Reservación actualizada correctamente.";
@@ -156,9 +211,7 @@ public class ReservationDAO implements IReservationDAO {
             if (tx.isActive()) {
                 tx.rollback();
             }
-
             return "Error al actualizar la reservación: " + e.getMessage();
-
         } finally {
             em.close();
         }

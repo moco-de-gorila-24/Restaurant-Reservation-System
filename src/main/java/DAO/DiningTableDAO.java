@@ -156,7 +156,17 @@ public class DiningTableDAO implements IDiningTableDAO {
             if (entidad == null) {
                 return "No se encontró la mesa.";
             }
+            
+            Long cantidadReservaciones = em.createQuery(
+                    "SELECT COUNT(r) FROM Reservation r WHERE r.diningTable.idTable = :idMesa", 
+                    Long.class)
+                    .setParameter("idMesa", id)
+                    .getSingleResult();
 
+            if (cantidadReservaciones > 0) {
+                return "No se puede eliminar la mesa porque ya esta reservada";
+            }
+            
             tx.begin();
             em.remove(entidad);
             tx.commit();

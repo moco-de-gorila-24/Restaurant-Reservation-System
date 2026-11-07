@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package Presentacion.Paneles;
 
 import Presentacion.Componentes.Button;
@@ -5,6 +9,11 @@ import Presentacion.Coordinador.Coordinador;
 
 import javax.swing.*;
 import java.awt.*;
+
+/**
+ * 
+ * @author Andres
+ */
 
 /**
  * Menu principal del sistema que navega a los modulos del restaurante, cliente y reservaciones
