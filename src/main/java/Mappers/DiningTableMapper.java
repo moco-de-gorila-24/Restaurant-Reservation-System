@@ -8,11 +8,25 @@ import DTO.DiningTableDTO;
 import Entidades.DiningTable;
 import Entidades.Restaurant;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author ACER
  */
 public class DiningTableMapper {
+
+    public static List<DiningTableDTO> toListDTO(List<DiningTable> entity){
+        if (entity == null) {
+            throw new IllegalArgumentException("La mesa y el restaurante son obligatorios.");
+        }
+        List<DiningTableDTO> dto = new ArrayList<>();
+        for (int i = 0; i < entity.size(); i++) {
+            dto.add(toDTO(entity.get(i)));
+        }
+        return dto;
+    }
 
     public static DiningTableDTO toDTO(DiningTable entity) {
         if (entity == null) {
@@ -26,10 +40,20 @@ public class DiningTableMapper {
 
         if (entity.getRestaurant() != null) {
             dto.setRestaurantId(entity.getRestaurant().getId());
-            dto.setRestaurantName(entity.getRestaurant().getName());
         }
 
         return dto;
+    }
+
+    public static List<DiningTable> toListEntity(List<DiningTableDTO> dto, Restaurant restaurant){
+        if (dto == null || restaurant == null) {
+            throw new IllegalArgumentException("La mesa y el restaurante son obligatorios.");
+        }
+        List<DiningTable> entidad = new ArrayList<>();
+        for (int i = 0; i < dto.size(); i++) {
+            entidad.add(toEntity(dto.get(i), restaurant));
+        }
+        return entidad;
     }
 
     public static DiningTable toEntity(DiningTableDTO dto, Restaurant restaurant) {

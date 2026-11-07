@@ -25,7 +25,7 @@ public class AddressMapper {
         dto.setPostCode(entity.getPostCode());
         dto.setCity(entity.getCity());
         dto.setNumber(entity.getNumber());
-        
+
         return dto;
     }
 
