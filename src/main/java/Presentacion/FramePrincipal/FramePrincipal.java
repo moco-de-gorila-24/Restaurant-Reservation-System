@@ -23,7 +23,7 @@ public class FramePrincipal extends JFrame {
 
     public void iniciarComponentes(){
         setSize(1080,720);
-        setTitle("Pantalla de Eleccion");
+        setTitle("Menu");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);

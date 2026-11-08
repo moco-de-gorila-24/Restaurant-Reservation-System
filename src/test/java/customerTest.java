@@ -14,9 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Clase de pruebas unitarias para validar la lógica de negocio y persistencia
  * de la entidad Customer (Clientes).
- * Utiliza JUnit 5 para verificar las reglas del sistema.
  * 
- * @author ACER
+ * @author Andres
  */
 public class customerTest {
 

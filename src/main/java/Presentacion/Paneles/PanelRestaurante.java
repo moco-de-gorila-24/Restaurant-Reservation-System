@@ -54,6 +54,12 @@ public class PanelRestaurante extends JPanel {
     private JLabel lblStatus;
     private Long idActual = null;
 
+    /**
+     * Constructor del panel de restaurantes.
+     * Configura el diseño base y construye los componentes de la interfaz.
+     * 
+     * @param coordinador Coordinador principal para la navegación.
+     */
     public PanelRestaurante(Coordinador coordinador) {
         this.coordinador = coordinador;
         setLayout(new BorderLayout(10, 10));
@@ -61,7 +67,10 @@ public class PanelRestaurante extends JPanel {
         setBackground(new Color(240, 235, 220));
         construirUI();
     }
-
+    
+    /**
+     * Construye y organiza los paneles principales (Header, Formulario y Botones).
+     */
     private void construirUI() {
         add(construirHeader(), BorderLayout.NORTH);
         add(construirFormulario(), BorderLayout.CENTER);
@@ -78,6 +87,11 @@ public class PanelRestaurante extends JPanel {
         add(sur, BorderLayout.SOUTH);
     }
 
+    /**
+     * Construye el panel superior (Header) con el botón de volver y el título.
+     * 
+     * @return Panel del encabezado configurado.
+     */
     private JPanel construirHeader() {
         JPanel norte = new JPanel(new BorderLayout());
         norte.setOpaque(false);
@@ -100,6 +114,12 @@ public class PanelRestaurante extends JPanel {
         return norte;
     }
 
+    /**
+     * Construye el formulario que contiene los datos del restaurante, 
+     * la dirección y la gestión de mesas.
+     * 
+     * @return Panel del formulario configurado y centrado.
+     */
     private JPanel construirFormulario() {
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setOpaque(false);
@@ -205,6 +225,11 @@ public class PanelRestaurante extends JPanel {
         contenedor.add(panelGuardar, BorderLayout.SOUTH);
         return contenedor;
     }
+    /**
+     * Construye la barra inferior de botones de acción (Actualizar, Eliminar, Buscar y Limpiar).
+     * 
+     * @return Panel con los botones distribuidos.
+     */
     private JPanel construirBarraBotones() {
         JPanel barra = new JPanel(new BorderLayout());
         barra.setOpaque(false);
@@ -240,6 +265,15 @@ public class PanelRestaurante extends JPanel {
         return barra;
     }
 
+    /**
+     * Método auxiliar para instanciar y estilizar botones planos.
+     * 
+     * @param texto Texto a mostrar en el botón.
+     * @param color Color de fondo.
+     * @param w Ancho preferido.
+     * @param h Alto preferido.
+     * @return El JButton configurado.
+     */
     private JButton boton(String texto, Color color, int w, int h) {
         JButton b = new JButton(texto);
         b.setBackground(color);
@@ -251,20 +285,39 @@ public class PanelRestaurante extends JPanel {
         return b;
     }
 
+    /**
+     * Muestra un mensaje de error en la barra de estado.
+     * @param msg Mensaje de error.
+     */
     private void mostrarError(String msg) {
         lblStatus.setForeground(new Color(190, 40, 40));
         lblStatus.setText(msg);
     }
 
+    /**
+     * Muestra un mensaje de éxito en la barra de estado.
+     * @param msg Mensaje de confirmación.
+     */
     private void mostrarExito(String msg) {
         lblStatus.setForeground(new Color(40, 140, 40));
         lblStatus.setText(msg);
     }
 
+    /**
+     * Formatea los datos de una mesa (DTO) en texto para ser mostrados en la lista.
+     * @param m DTO de la mesa.
+     * @return Cadena de texto formateada.
+     */
     private String formatoMesa(DiningTableDTO m) {
         return "Mesa " + m.getNumber() + " (cap " + m.getCapacity() + ")";
     }
 
+    /**
+     * Agrega una nueva mesa a la lista de edición local (en memoria).
+     * Valida que la capacidad ingresada sea numérica y mayor a cero.
+     * 
+     * @return true si la mesa fue agregada correctamente.
+     */
     private boolean agregarMesa() {
         try {
             int cap = Integer.parseInt(txtCapMesa.getText().trim());
@@ -281,6 +334,10 @@ public class PanelRestaurante extends JPanel {
         }
     }
 
+    /**
+     * Quita la mesa actualmente seleccionada en la lista de edición.
+     * @return true si se pudo quitar.
+     */
     private boolean quitarMesa() {
         int idx = listaMesas.getSelectedIndex();
         if (idx < 0) { mostrarError("Selecciona una mesa para quitar."); return false; }
@@ -289,6 +346,10 @@ public class PanelRestaurante extends JPanel {
         return true;
     }
 
+    /**
+     * Renumera consecutivamente (1, 2, 3...) las mesas en la lista para 
+     * evitar saltos en la numeración visual.
+     */
     private void renumerarMesas() {
         for (int i = 0; i < mesasEnEdicion.size(); i++) {
             mesasEnEdicion.get(i).setNumber(i + 1);
@@ -299,6 +360,10 @@ public class PanelRestaurante extends JPanel {
         }
     }
 
+    /**
+     * Carga una lista de mesas desde la base de datos hacia el componente visual.
+     * @param mesas Lista de DTOs de mesas.
+     */
     private void cargarMesasEnLista(List<DiningTableDTO> mesas) {
         mesasEnEdicion.clear();
         modeloListaMesas.clear();
@@ -308,10 +373,22 @@ public class PanelRestaurante extends JPanel {
         }
     }
 
+    /**
+     * Delega la acción de guardar. Si no hay un ID seleccionado, crea uno nuevo; 
+     * de lo contrario, actualiza el existente.
+     * 
+     * @return true si la operación fue exitosa.
+     */
     private boolean guardar() {
         return idActual == null ? crear() : actualizar();
     }
     
+    /**
+     * Crea un nuevo restaurante en la base de datos.
+     * Sigue el orden de persistencia: 1. Dirección, 2. Restaurante, 3. Mesas.
+     * 
+     * @return true si todo se guardó correctamente.
+     */
     private boolean crear() {
         if (!validarFormulario()) {
             return false;
@@ -356,8 +433,13 @@ public class PanelRestaurante extends JPanel {
         return true;
     }
     
-    //acciones con diálogo
-
+    
+    /**
+     * Acción ejecutada por el botón "Actualizar". Despliega el diálogo de selección 
+     * y carga los datos del restaurante elegido en el formulario.
+     * 
+     * @return true si el restaurante fue seleccionado y cargado.
+     */
     private boolean accionActualizar() {
         Long id = mostrarDialogoSeleccion("Seleccionar restaurante a actualizar", "Editar");
 
@@ -369,6 +451,12 @@ public class PanelRestaurante extends JPanel {
         return true;
     }
 
+    /**
+     * Acción ejecutada por el botón "Eliminar". Despliega el diálogo de selección, 
+     * solicita confirmación y elimina el restaurante de la BD (junto con sus mesas y dirección por cascada).
+     * 
+     * @return true si el restaurante fue eliminado con éxito.
+     */
     private boolean accionEliminar() {
         Long id = mostrarDialogoSeleccion("Seleccionar restaurante a eliminar", "Eliminar");
 
@@ -404,6 +492,12 @@ public class PanelRestaurante extends JPanel {
         return false;
     }
 
+    /**
+     * Acción ejecutada por el botón "Buscar". Abre un diálogo mostrando
+     * la tabla con todos los restaurantes registrados.
+     * 
+     * @return true si hay registros disponibles y se abre el diálogo.
+     */
     private boolean accionBuscar() {
         List<RestaurantDTO> restaurantes = restaurantDAO.consultarTodos();
 
@@ -416,7 +510,14 @@ public class PanelRestaurante extends JPanel {
         return true;
     }
 
-    //diálogos modales
+    /**
+     * Muestra un diálogo modal con una tabla que contiene a todos los restaurantes.
+     * Permite seleccionar uno y retorna su ID.
+     * 
+     * @param titulo Título de la ventana.
+     * @param textoBotonOk Texto del botón de confirmación.
+     * @return El ID del restaurante seleccionado, o null si se cancela.
+     */
     private Long mostrarDialogoSeleccion(String titulo, String textoBotonOk) {
         DefaultTableModel modelo = crearModeloTabla();
 
@@ -468,6 +569,9 @@ public class PanelRestaurante extends JPanel {
         return seleccion[0];
     }
 
+    /**
+     * Muestra un diálogo modal meramente informativo con la tabla de todos los restaurantes.
+     */
     private void mostrarDialogoBusqueda() {
         DefaultTableModel modelo = crearModeloTabla();
 
@@ -494,6 +598,12 @@ public class PanelRestaurante extends JPanel {
         dlg.setVisible(true);
     }
 
+    /**
+     * Genera el modelo de datos para las tablas, cruzando la información de 
+     * restaurantes, direcciones y cantidad de mesas desde la base de datos.
+     * 
+     * @return DefaultTableModel listo para mostrarse en pantalla.
+     */
     private DefaultTableModel crearModeloTabla() {
         String[] columnas = {"ID", "Nombre", "Teléfono", "Tipo de cocina", "Calle", "Ciudad", "Cantidad de mesas"};
 
@@ -525,6 +635,10 @@ public class PanelRestaurante extends JPanel {
         return modelo;
     }
 
+    /**
+     * Limpia todos los campos de texto del formulario, vacía la lista de mesas
+     * y reinicia el estado de edición (idActual = null).
+     */
     private void limpiar() {
         idActual = null;
 
@@ -544,6 +658,12 @@ public class PanelRestaurante extends JPanel {
         lblStatus.setText(" ");
     }
     
+    /**
+     * Actualiza un restaurante existente en la base de datos.
+     * Actualiza la dirección, el restaurante y sincroniza las mesas.
+     * 
+     * @return true si la actualización fue exitosa.
+     */
     private boolean actualizar() {
         if (idActual == null) {
             mostrarError("Selecciona un restaurante para actualizar.");
@@ -589,6 +709,14 @@ public class PanelRestaurante extends JPanel {
         return true;
     }
     
+    /**
+     * Sincroniza las mesas del formulario con las de la base de datos.
+     * Elimina las mesas que ya no están en la lista, actualiza las modificadas 
+     * y guarda las nuevas.
+     * 
+     * @param restaurantId ID del restaurante al que pertenecen las mesas.
+     * @return true si la sincronización fue exitosa.
+     */
     private boolean sincronizarMesas(Long restaurantId) {
         List<DiningTableDTO> mesasBD = diningTableDAO.consultarPorRestaurante(restaurantId);
 
@@ -643,6 +771,12 @@ public class PanelRestaurante extends JPanel {
         return true;
     }
 
+    /**
+     * Carga los datos de un restaurante (junto con su dirección y mesas)
+     * desde la base de datos hacia los campos del formulario para su edición.
+     * 
+     * @param id ID del restaurante a cargar.
+     */
     private void cargarRestaurante(Long id) {
         RestaurantDTO restaurante = restaurantDAO.consultarPorId(id);
 
@@ -677,6 +811,12 @@ public class PanelRestaurante extends JPanel {
         mostrarExito("Editando restaurante #" + idActual + ". Modifica los datos y presiona Guardar.");
     }
     
+    /**
+     * Valida que todos los campos del formulario cumplan con las reglas 
+     * de longitud y formato definidas por el sistema.
+     * 
+     * @return true si todos los datos son válidos.
+     */
     private boolean validarFormulario() {
         if (txtNombre.getText().trim().isEmpty()) {
             mostrarError("El nombre no puede estar vacío.");
@@ -751,7 +891,13 @@ public class PanelRestaurante extends JPanel {
 
         return true;
     }
-
+    
+    /**
+     * Extrae y construye un objeto AddressDTO a partir de los campos de texto
+     * de la dirección en el formulario.
+     * 
+     * @return Un AddressDTO con los datos ingresados.
+     */
     private AddressDTO obtenerDireccionFormulario() {
         return new AddressDTO(txtCalle.getText().trim(), txtEstado.getText().trim(), Integer.parseInt(txtCP.getText().trim()), txtCiudad.getText().trim(), Integer.parseInt(txtNumero.getText().trim()));
     }

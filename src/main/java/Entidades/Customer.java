@@ -33,7 +33,15 @@ public class Customer implements Serializable {
     @CollectionTable(name = "customer_telephones", joinColumns = @JoinColumn(name = "customer_id"))
     @Column(name = "telephone", nullable = true, length = 10)
     private List<String> telephone = new ArrayList<>();
-
+    
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "RestaurantCustomer", // Nombre exacto que pediste
+        joinColumns = @JoinColumn(name = "customer_id"),
+        inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    private List<Restaurant> restaurantCustomer = new ArrayList<>();
+    
     public Customer() {
     }
 
@@ -78,5 +86,14 @@ public class Customer implements Serializable {
         this.telephone = telephone;
         return this;
     }
+
+    public List<Restaurant> getRestaurantCustomer() {
+        return restaurantCustomer;
+    }
+
+    public void setRestaurantCustomer(List<Restaurant> restaurantCustomer) {
+        this.restaurantCustomer = restaurantCustomer;
+    }
+    
 
 }

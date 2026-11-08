@@ -38,6 +38,8 @@ public class Restaurant implements Serializable {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiningTable> tables = new ArrayList<>();
     
+    @ManyToMany(mappedBy = "restaurantCustomer", fetch = FetchType.LAZY)
+    private List<Customer> customersRestaurant = new ArrayList<>();
     public Restaurant() {
     }
 
@@ -103,6 +105,15 @@ public class Restaurant implements Serializable {
         }
         return this;
     }
+
+    public List<Customer> getCustomersRestaurant() {
+        return customersRestaurant;
+    }
+
+    public void setCustomersRestaurant(List<Customer> customersRestaurant) {
+        this.customersRestaurant = customersRestaurant;
+    }
+    
 
     /**
      * Agrega una mesa al restaurante y establece la relación bidireccional.
