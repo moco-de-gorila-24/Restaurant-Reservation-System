@@ -280,7 +280,7 @@ public class PanelCliente extends JPanel {
      */
     private void mostrarError(String msg) {
         lblStatus.setForeground(new Color(190, 40, 40));
-        lblStatus.setText("⚠ " + msg);
+        lblStatus.setText(msg);
     }
     
     /**
@@ -289,7 +289,7 @@ public class PanelCliente extends JPanel {
      */
     private void mostrarExito(String msg) {
         lblStatus.setForeground(new Color(40, 140, 40));
-        lblStatus.setText("✔ " + msg);
+        lblStatus.setText(msg);
     }
 
     /**
